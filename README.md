@@ -93,7 +93,7 @@ The service can be started by issuing the following command (*with the right par
 natstest --serverAddress=":8080" --natsAddress="nats://127.0.0.1:4222"
 ```
 
-If no command-line parameters are specified, then the ones in the configuration file (**config.json**) will be used.
+If no command-line parameters are specified, then the ones in the configuration file (**config.json**) will be used. \
 The configuration files can be stored in the current directory or in any of the following (in order of precedence):
 * ./
 * config/
@@ -101,7 +101,7 @@ The configuration files can be stored in the current directory or in any of the 
 * /etc/natstest/
 
 
-This service also support secure remote configuration via Consul or Etcd.
+This service also support secure remote configuration via [Consul](https://www.consul.io/) or [Etcd](https://github.com/coreos/etcd). \
 The remote configuration server can be defined either in the local configuration file using the following parameters, or with environment variables:
 
 * **remoteConfigProvider** : remote configuration source ("consul", "etcd");
