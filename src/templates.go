@@ -207,7 +207,7 @@ func execTransfCmd(template string, value reflect.Value) (reflect.Value, error) 
 	if !isValidTransfCmd[parts[0]] {
 		return value, fmt.Errorf("the following command is not valid: %v", parts[0])
 	}
-	args := parts[1:len(parts)]
+	args := parts[1:]
 	out, err := exec.Command(parts[0], args...).Output()
 	if err != nil {
 		return value, fmt.Errorf("unable to run the command: %v -- [%v]", command, err)
