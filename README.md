@@ -2,6 +2,15 @@
 
 *NATS Bus Test Component*
 
+[![Master Branch](https://img.shields.io/badge/-master:-gray.svg)](https://github.com/miracl/natstest/tree/master)
+[![Master Build Status](https://secure.travis-ci.org/miracl/natstest.png?branch=master)](https://travis-ci.org/miracl/natstest?branch=master)
+[![Master Coverage Status](https://coveralls.io/repos/miracl/natstest/badge.svg?branch=master&service=github)](https://coveralls.io/github/miracl/natstest?branch=master)
+
+[![Develop Branch](https://img.shields.io/badge/-develop:-gray.svg)](https://github.com/miracl/natstest/tree/develop)
+[![Develop Build Status](https://secure.travis-ci.org/miracl/natstest.png?branch=develop)](https://travis-ci.org/miracl/natstest?branch=develop)
+[![Develop Coverage Status](https://coveralls.io/repos/miracl/natstest/badge.svg?branch=develop&service=github)](https://coveralls.io/github/miracl/natstest?branch=develop)
+[![Go Report Card](https://goreportcard.com/badge/github.com/miracl/natstest)](https://goreportcard.com/report/github.com/miracl/natstest)
+
 * **category**:    Service
 * **author**:      Nicola Asuni <nicola.asuni@miracl.com>
 * **copyright**:   2016 MIRACL UK LTD
