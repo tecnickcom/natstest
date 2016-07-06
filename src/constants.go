@@ -44,7 +44,7 @@ const RemoteConfigPath = ""
 // RemoteConfigSecretKeyring is the path to the openpgp secret keyring used to decript the remote configuration data ("/etc/natstest/configkey.gpg")
 const RemoteConfigSecretKeyring = ""
 
-// ValidTransfCmd contains the default list of valid tranformation commands to be used in test configuration templates
+// ValidTransfCmd contains the default list of valid transformation commands to be used in test configuration templates
 var ValidTransfCmd = []string{
 	"/bin/cat",
 	"/bin/echo",
