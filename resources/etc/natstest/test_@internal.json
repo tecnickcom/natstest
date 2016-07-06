@@ -1,0 +1,84 @@
+[
+	{
+		"Topic" : "@.internal.test",
+		"Request" : {
+			"integer" : 123,
+			"name" : "some string",
+			"previousReturnedValue" : "alpha",
+			"array" : [
+				{
+					"key1" : "value2",
+					"key2" : "beta"
+				},
+				{
+					"key1" : "value2",
+					"key2" : "value2 test string"
+				}
+			],
+			"submap" : {
+				"key1" : "gamma",
+				"key2" : "delta"
+			}
+		},
+		"Response" : {
+			"integer" : "~re:[0-9]+",
+			"name" : "~re:[a-z ]+",
+			"previousReturnedValue" : "~pv:0.Request.previousReturnedValue",
+			"array" : [
+				{
+					"key1" : "value2",
+					"key2" : "beta"
+				},
+				{
+					"key1" : "value2",
+					"key2" : "value2 test string"
+				}
+			],
+			"submap" : {
+				"key1" : "gamma",
+				"key2" : "delta"
+			}
+		}
+	},
+	{
+		"Topic" : "@.internal.test",
+		"Request" : {
+			"integer" : 123,
+			"name" : "some string",
+			"previousReturnedValue" : "~pv:0.Response.name>/bin/echo -n %v",
+			"array" : [
+				{
+					"key1" : "value2",
+					"key2" : "~pv:0.Response.array.0.key2"
+				},
+				{
+					"key1" : "~pv:0.Response.submap",
+					"key2" : "value2"
+				}
+			],
+			"submap" : {
+				"key1" : "~pv:0.Request.name",
+				"key2" : "~pv:0.Request.integer"
+			}
+		},
+		"Response" : {
+			"integer" : 123,
+			"name" : "some string",
+			"previousReturnedValue" : "~pv:1.Request.previousReturnedValue",
+			"array" : [
+				{
+					"key1" : "value2",
+					"key2" : "~pv:1.Request.array.0.key2"
+				},
+				{
+					"key1" : "~pv:1.Request.array.1.key1",
+					"key2" : "value2"
+				}
+			],
+			"submap" : {
+				"key1" : "~pv:1.Request.submap.key1",
+				"key2" : "~pv:1.Request.submap.key2"
+			}
+		}
+	}
+]

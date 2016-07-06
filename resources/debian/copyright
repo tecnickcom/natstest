@@ -1,0 +1,11 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ~#PROJECT#~
+Upstream-Contact: Nicola Asuni <nicola.asuni@miracl.com>
+Source: https://github.com/~#VENDOR#~/~#PROJECT#~
+
+Files: *
+Copyright: Copyright 2016 MIRACL UK LTD <support@miracl.com>
+License: Apache-2.0
+
+License: Apache-2.0
+ http://www.apache.org/licenses/LICENSE-2.0

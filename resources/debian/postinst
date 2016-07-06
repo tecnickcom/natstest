@@ -1,0 +1,10 @@
+#!/bin/sh
+# postinst script for natstest
+
+set -e
+
+update-rc.d -f natstest defaults
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,43 @@
+[
+	{
+		"Topic" : "@.cli.test",
+		"Request" : {
+			"integer" : 123,
+			"name" : "some string",
+			"previousReturnedValue" : "alpha",
+			"array" : [
+				{
+					"key1" : "value2",
+					"key2" : "beta"
+				},
+				{
+					"key1" : "value2",
+					"key2" : "value2 test string"
+				}
+			],
+			"submap" : {
+				"key1" : "gamma",
+				"key2" : "delta"
+			}
+		},
+		"Response" : {
+			"integer" : "~re:[0-9]+",
+			"name" : "~re:[a-z ]+",
+			"previousReturnedValue" : "~pv:0.Request.previousReturnedValue",
+			"array" : [
+				{
+					"key1" : "value2",
+					"key2" : "beta"
+				},
+				{
+					"key1" : "value2",
+					"key2" : "value2 test string"
+				}
+			],
+			"submap" : {
+				"key1" : "gamma",
+				"key2" : "delta"
+			}
+		}
+	}
+]

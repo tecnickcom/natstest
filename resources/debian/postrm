@@ -1,0 +1,10 @@
+#!/bin/sh
+# postrm script for natstest
+
+set -e
+
+update-rc.d -f natstest remove
+
+#DEBHELPER#
+
+exit 0

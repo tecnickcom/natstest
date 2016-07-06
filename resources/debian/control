@@ -1,0 +1,20 @@
+Source: ~#PKGNAME#~
+Maintainer: Nicola Asuni <nicola.asuni@miracl.com>
+Section: utils
+Priority: optional
+Build-Depends: debhelper (>= 9), dh-golang
+Standards-Version: 3.9.7
+Homepage: https://github.com/~#VENDOR#~/~#PROJECT#~
+Vcs-Git: https://github.com/~#VENDOR#~/~#PROJECT#~.git
+
+Package: ~#PKGNAME#~
+Provides: ~#PROJECT#~
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: NATS Test Component
+ This program provides a RESTful HTTP JSON API service
+ to test services connected to a NATS bus.
+ It has been designed to test any system composed by
+ services that exchange JSON messages via a NATS bus.
+
+ 

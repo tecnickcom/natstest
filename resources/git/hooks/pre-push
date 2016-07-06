@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# pre-push
+#
+# This is a GIT hook script that checks if the version in the VERSION file
+# has been correctly updated before pushing to the master branch.
+#
+# This script expects that a file named VERSION exists in the root of the project
+# and contains only a semantic version number (i.e. MAJOR.MINOR.PATCH).
+#
+# To use this git hook, copy it under the .git/hooks folder and be sure it has the executable bit set.
+#
+# @author Nicola Asuni <nicola.asuni@miracl.com>
+
+# read the current git branch name
+CURRENT_GIT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+
+# this script only applies to the master branch
+if [ "${CURRENT_GIT_BRANCH}" != "master" ]; then
+	exit 0
+fi
+
+# check if the local VERSION file is different than the remote one
+VERSION_DIFF=`git diff origin/master -- VERSION | tail -2`
+if [ "${VERSION_DIFF}" = "" ]; then
+	echo >&2 "ERROR: The version in the VERSION file has not been incremented!"
+	exit 1
+else
+	# check if the version number has been incremented
+	OLD_VERSION=`echo $VERSION_DIFF | grep -Po "[-]\K([^ ]+)" | gawk -F. '{ printf("%03d%03d%06d\n", $1,$2,$3); }'`
+	NEW_VERSION=`echo $VERSION_DIFF | grep -Po "[+]\K([^ ]+)" | gawk -F. '{ printf("%03d%03d%06d\n", $1,$2,$3); }'`
+	if [ $OLD_VERSION -gt $NEW_VERSION ]; then
+		echo >&2 "ERROR: The version in the VERSION file must be greater than the previous one!"
+		exit 1
+	fi
+fi
+
+exit 0

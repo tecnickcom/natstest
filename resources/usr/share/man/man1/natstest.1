@@ -1,0 +1,25 @@
+.\" Manpage for natstest.
+.TH NATSTEST "1" "2016" "natstest" "User Commands"
+.SH NAME
+natstest \- NATS Test Component.
+.SH DESCRIPTION
+NATS Test Component.
+.SS "Usage:"
+.IP
+natstest [flags]
+natstest [command]
+.SS "Available Commands:"
+.TP
+version
+print this program version
+.SS "Flags:"
+.HP
+\fB\-s\fR, \fB\-\-serverAddress\fR=\fI10\fR: HTTP API URL (ip:port) or just (:port)
+.HP
+\fB\-n\fR, \fB\-\-natsAddress\fR=\fI10\fR: NATS bus Address (nats://ip:port)
+.PP
+Use "natstest [command] \fB\-\-help\fR" for more information about a command.
+.SH AUTHOR
+Nicola Asuni (nicola.asuni@miracl.com)
+.SH COPYRIGHT
+(c) 2016 MIRACL UK LTD

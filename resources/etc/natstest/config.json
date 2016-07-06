@@ -1,0 +1,13 @@
+{
+    "remoteConfigProvider" : "",
+    "remoteConfigEndpoint" : "",
+    "remoteConfigPath" : "",
+    "remoteConfigSecretKeyring" : "",
+    "serverAddress" : ":8081",
+    "natsAddress" : "nats://127.0.0.1:4222",
+    "validTransfCmd" : [
+        "/bin/cat",
+        "/bin/echo",
+        "/usr/bin/md5str.sh"
+    ]
+}
