@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------------
 
 # List special make targets that are not associated with files
-.PHONY: help all test format fmtcheck vet lint coverage cyclo ineffassign misspell qa deps install uninstall clean nuke build rpm deb bz2 docker dockertest dbuild
+.PHONY: help all test format fmtcheck vet lint coverage cyclo ineffassign misspell astscan qa deps install uninstall clean nuke build rpm deb bz2 docker dockertest dbuild
 
 # Use bash as shell (Note: Ubuntu now uses dash which doesn't support PIPESTATUS).
 SHELL=/bin/bash
@@ -109,6 +109,7 @@ help:
 	@echo "    make cyclo       : Generate the cyclomatic complexity report"
 	@echo "    make ineffassign : Detect ineffectual assignments"
 	@echo "    make misspell    : Detect commonly misspelled words in source files"
+	@echo "    make astscan     : GO AST scanner"
 	@echo ""
 	@echo "    make docs        : Generate source code documentation"
 	@echo ""
@@ -179,6 +180,11 @@ misspell:
 	@mkdir -p target/report
 	GOPATH=$(GOPATH) misspell -error ./src  | tee target/report/misspell.txt
 
+# AST scanner
+astscan:
+	@mkdir -p target/report
+	GOPATH=$(GOPATH) gas -nosec=true ./... | tee target/report/astscan.txt
+
 # Generate source docs
 docs:
 	@mkdir -p target/docs
@@ -187,7 +193,7 @@ docs:
 	@echo '<html><head><meta http-equiv="refresh" content="0;./127.0.0.1:6060/pkg/github.com/'${OWNER}'/'${PROJECT}'/index.html"/></head><a href="./127.0.0.1:6060/pkg/github.com/'${OWNER}'/'${PROJECT}'/index.html">'${PKGNAME}' Documentation ...</a></html>' > target/docs/index.html
 
 # Alias to run targets: fmtcheck test vet lint coverage
-qa: fmtcheck test vet lint coverage cyclo ineffassign misspell
+qa: fmtcheck test vet lint coverage cyclo ineffassign misspell astscan
 
 # --- INSTALL ---
 
@@ -202,6 +208,7 @@ deps:
 	GOPATH=$(GOPATH) go get github.com/client9/misspell/cmd/misspell
 	GOPATH=$(GOPATH) go get github.com/inconshreveable/mousetrap
 	GOPATH=$(GOPATH) go get github.com/nats-io/gnatsd
+	GOPATH=$(GOPATH) go get github.com/HewlettPackard/gas
 
 # Install this application
 install: uninstall
