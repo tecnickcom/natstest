@@ -67,32 +67,32 @@ func processTemplates(copy, original reflect.Value) {
 
 	// If it is a pointer we need to unwrap and call once again
 	case reflect.Ptr:
-		processPtr(copy, original)
+		processTemplatePtr(copy, original)
 
 	// If it is an interface (which is very similar to a pointer), do basically the
 	// same as for the pointer. Though a pointer is not the same as an interface so
 	// note that we have to call Elem() after creating a new object because otherwise
 	// we would end up with an actual pointer
 	case reflect.Interface:
-		processInterface(copy, original)
+		processTemplateInterface(copy, original)
 
 	// If it is a struct we process each field
 	case reflect.Struct:
-		processStruct(copy, original)
+		processTemplateStruct(copy, original)
 
 	// If it is a slice we create a new slice and process each element
 	case reflect.Slice:
-		processSlice(copy, original)
+		processTemplateSlice(copy, original)
 
 	// If it is a map we create a new map and process each value
 	case reflect.Map:
-		processMap(copy, original)
+		processTemplateMap(copy, original)
 
 	// Otherwise we cannot traverse anywhere so this finishes the recursion
 
 	// If it is a string process, check if it is a template
 	case reflect.String:
-		processString(copy, original)
+		processTemplateString(copy, original)
 
 	// And everything else will simply be taken from the original
 	default:
@@ -100,8 +100,8 @@ func processTemplates(copy, original reflect.Value) {
 	}
 }
 
-// processPtr process the Ptr case
-func processPtr(copy, original reflect.Value) {
+// processTemplatePtr process the Ptr case
+func processTemplatePtr(copy, original reflect.Value) {
 	// To get the actual value of the original we have to call Elem()
 	// At the same time this unwraps the pointer so we don't end up in
 	// an infinite recursion
@@ -116,8 +116,8 @@ func processPtr(copy, original reflect.Value) {
 	processTemplates(copy.Elem(), originalValue)
 }
 
-// processInterface process the Interface case
-func processInterface(copy, original reflect.Value) {
+// processTemplateInterface process the Interface case
+func processTemplateInterface(copy, original reflect.Value) {
 	// Get rid of the wrapping interface
 	originalValue := original.Elem()
 	// Check if the pointer is nil
@@ -131,23 +131,23 @@ func processInterface(copy, original reflect.Value) {
 	copy.Set(copyValue)
 }
 
-// processStruct process the Struct case
-func processStruct(copy, original reflect.Value) {
+// processTemplateStruct process the Struct case
+func processTemplateStruct(copy, original reflect.Value) {
 	for i := 0; i < original.NumField(); i++ {
 		processTemplates(copy.Field(i), original.Field(i))
 	}
 }
 
-// processSlice process the Slice case
-func processSlice(copy, original reflect.Value) {
+// processTemplateSlice process the Slice case
+func processTemplateSlice(copy, original reflect.Value) {
 	copy.Set(reflect.MakeSlice(original.Type(), original.Len(), original.Cap()))
 	for i := 0; i < original.Len(); i++ {
 		processTemplates(copy.Index(i), original.Index(i))
 	}
 }
 
-// processMap process the Map case
-func processMap(copy, original reflect.Value) {
+// processTemplateMap process the Map case
+func processTemplateMap(copy, original reflect.Value) {
 	copy.Set(reflect.MakeMap(original.Type()))
 	for _, key := range original.MapKeys() {
 		originalValue := original.MapIndex(key)
@@ -158,8 +158,8 @@ func processMap(copy, original reflect.Value) {
 	}
 }
 
-// processString process the String case
-func processString(copy, original reflect.Value) {
+// processTemplateString process the String case
+func processTemplateString(copy, original reflect.Value) {
 	value := original.Interface().(string)
 	tmark := value[0:int(math.Min(float64(len(value)), float64(4)))] // template marker
 	if tmark == "~ts:" {

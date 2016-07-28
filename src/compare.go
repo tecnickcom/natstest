@@ -37,55 +37,79 @@ func checkMatch(expected reflect.Value, actual reflect.Value) (err error) {
 		return checkMatch(expected.Elem(), actual.Elem())
 
 	case reflect.Struct:
-		if expected.NumField() > actual.NumField() {
-			return getFormattedDiffError("missing struct fields", expected, actual)
-		}
-		for i := 0; i < expected.NumField(); i++ {
-			err = checkMatch(expected.Field(i), actual.Field(i))
-			if err != nil {
-				return err
-			}
-		}
+		return processCompareStruct(expected, actual)
 
 	case reflect.Slice:
-		if expected.Len() > actual.Len() {
-			return getFormattedDiffError("missing slice items", expected, actual)
-		}
-		for i := 0; i < expected.Len(); i++ {
-			err = checkMatch(expected.Index(i), actual.Index(i))
-			if err != nil {
-				return err
-			}
-		}
+		return processCompareSlice(expected, actual)
 
 	case reflect.Map:
-		for _, key := range expected.MapKeys() {
-			err = checkMatch(expected.MapIndex(key), actual.MapIndex(key))
-			if err != nil {
-				return err
-			}
-		}
+		return processCompareMap(expected, actual)
 
 	default:
-		if expected.Interface() != actual.Interface() {
-			if expected.Kind() != reflect.String {
-				return getFormattedDiffError("values are different", expected, actual)
-			}
-			// check if the expected value is a regular expression
-			value := expected.Interface().(string)
-			if len(value) == 0 || value[0] != '~' || value[0:int(math.Min(float64(len(value)), float64(4)))] != "~re:" {
-				// the value is not a regular expression
-				return getFormattedDiffError("values are different", expected, actual)
-			}
-			// compare using a regular expression
-			sv := fmt.Sprintf("%v", actual.Interface())
-			match, _ := regexp.MatchString(value[4:], sv)
-			if !match {
-				return getFormattedDiffError("the regular expression do not match", expected, actual)
-			}
+		return processCompareDefault(expected, actual)
+
+	}
+}
+
+// processCompareStruct process the Struct case
+func processCompareStruct(expected reflect.Value, actual reflect.Value) (err error) {
+	if expected.NumField() > actual.NumField() {
+		return getFormattedDiffError("missing struct fields", expected, actual)
+	}
+	for i := 0; i < expected.NumField(); i++ {
+		err = checkMatch(expected.Field(i), actual.Field(i))
+		if err != nil {
+			return err
 		}
 	}
+	return nil
+}
 
+// processCompareSlice process the Slice case
+func processCompareSlice(expected reflect.Value, actual reflect.Value) (err error) {
+	if expected.Len() > actual.Len() {
+		return getFormattedDiffError("missing slice items", expected, actual)
+	}
+	for i := 0; i < expected.Len(); i++ {
+		err = checkMatch(expected.Index(i), actual.Index(i))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// processCompareMap process the Map case
+func processCompareMap(expected reflect.Value, actual reflect.Value) (err error) {
+	for _, key := range expected.MapKeys() {
+		err = checkMatch(expected.MapIndex(key), actual.MapIndex(key))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// processCompareDefault process the Default case
+func processCompareDefault(expected reflect.Value, actual reflect.Value) (err error) {
+	if expected.Interface() == actual.Interface() {
+		return nil
+	}
+	if expected.Kind() != reflect.String {
+		return getFormattedDiffError("values are different", expected, actual)
+	}
+	// check if the expected value is a regular expression
+	value := expected.Interface().(string)
+	if len(value) == 0 || value[0] != '~' || value[0:int(math.Min(float64(len(value)), float64(4)))] != "~re:" {
+		// the value is not a regular expression
+		return getFormattedDiffError("values are different", expected, actual)
+	}
+	// compare using a regular expression
+	sv := fmt.Sprintf("%v", actual.Interface())
+	match, _ := regexp.MatchString(value[4:], sv)
+	if !match {
+		return getFormattedDiffError("the regular expression do not match", expected, actual)
+	}
 	return nil
 }
 
