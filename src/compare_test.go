@@ -44,6 +44,9 @@ func TestAreMatching(t *testing.T) {
 	if err == nil {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
+}
+
+func TestAreMatchingVertex(t *testing.T) {
 
 	type Vertex2 struct {
 		X int
@@ -62,7 +65,7 @@ func TestAreMatching(t *testing.T) {
 
 	// pointers
 
-	err = areMatching(&v2, &v2)
+	err := areMatching(&v2, &v2)
 	if err != nil {
 		t.Error(fmt.Errorf("error while processing templates: %v", err))
 	}
@@ -93,6 +96,9 @@ func TestAreMatching(t *testing.T) {
 	if err == nil {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
+}
+
+func TestAreMatchingSlice(t *testing.T) {
 
 	// slice
 
@@ -100,7 +106,7 @@ func TestAreMatching(t *testing.T) {
 	s3 := []int{3, 5, 7}
 	s4 := []int{3, 11, 7}
 
-	err = areMatching(s2, s2)
+	err := areMatching(s2, s2)
 	if err != nil {
 		t.Error(fmt.Errorf("error while processing templates: %v", err))
 	}
@@ -114,6 +120,9 @@ func TestAreMatching(t *testing.T) {
 	if err == nil {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
+}
+
+func TestAreMatchingMap(t *testing.T) {
 
 	// map
 
@@ -121,7 +130,7 @@ func TestAreMatching(t *testing.T) {
 	m3 := map[string]int{"a": 3, "b": 5, "c": 7}
 	m4 := map[string]int{"a": 3, "b": 11, "c": 7}
 
-	err = areMatching(m2, m2)
+	err := areMatching(m2, m2)
 	if err != nil {
 		t.Error(fmt.Errorf("error while processing templates: %v", err))
 	}
