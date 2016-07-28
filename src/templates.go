@@ -67,100 +67,130 @@ func processTemplates(copy, original reflect.Value) {
 
 	// If it is a pointer we need to unwrap and call once again
 	case reflect.Ptr:
-		// To get the actual value of the original we have to call Elem()
-		// At the same time this unwraps the pointer so we don't end up in
-		// an infinite recursion
-		originalValue := original.Elem()
-		// Check if the pointer is nil
-		if !originalValue.IsValid() {
-			return
-		}
-		// Allocate a new object and set the pointer to it
-		copy.Set(reflect.New(originalValue.Type()))
-		// Unwrap the newly created pointer
-		processTemplates(copy.Elem(), originalValue)
+		processPtr(copy, original)
 
 	// If it is an interface (which is very similar to a pointer), do basically the
 	// same as for the pointer. Though a pointer is not the same as an interface so
 	// note that we have to call Elem() after creating a new object because otherwise
 	// we would end up with an actual pointer
 	case reflect.Interface:
-		// Get rid of the wrapping interface
-		originalValue := original.Elem()
-		// Check if the pointer is nil
-		if !originalValue.IsValid() {
-			return
-		}
-		// Create a new object. Now new gives us a pointer, but we want the value it
-		// points to, so we have to call Elem() to unwrap it
-		copyValue := reflect.New(originalValue.Type()).Elem()
-		processTemplates(copyValue, originalValue)
-		copy.Set(copyValue)
+		processInterface(copy, original)
 
 	// If it is a struct we process each field
 	case reflect.Struct:
-		for i := 0; i < original.NumField(); i++ {
-			processTemplates(copy.Field(i), original.Field(i))
-		}
+		processStruct(copy, original)
 
 	// If it is a slice we create a new slice and process each element
 	case reflect.Slice:
-		copy.Set(reflect.MakeSlice(original.Type(), original.Len(), original.Cap()))
-		for i := 0; i < original.Len(); i++ {
-			processTemplates(copy.Index(i), original.Index(i))
-		}
+		processSlice(copy, original)
 
 	// If it is a map we create a new map and process each value
 	case reflect.Map:
-		copy.Set(reflect.MakeMap(original.Type()))
-		for _, key := range original.MapKeys() {
-			originalValue := original.MapIndex(key)
-			// New gives us a pointer, but again we want the value
-			copyValue := reflect.New(originalValue.Type()).Elem()
-			processTemplates(copyValue, originalValue)
-			copy.SetMapIndex(key, copyValue)
-		}
+		processMap(copy, original)
 
 	// Otherwise we cannot traverse anywhere so this finishes the recursion
 
 	// If it is a string process, check if it is a template
 	case reflect.String:
-		value := original.Interface().(string)
-		tmark := value[0:int(math.Min(float64(len(value)), float64(4)))] // template marker
-		if tmark == "~ts:" {
-			// replace the template with the current time
-			t := time.Now().UTC()
-			// extract time format
-			timeFormat := value[4:]
-			if timeFormat != "" {
-				copy.SetString(t.Format(timeFormat))
-			} else {
-				// unix timestamp in seconds
-				jenc, err := json.Marshal(int32(t.Unix()))
-				if err == nil {
-					copy.SetString(jsonStartMark + string(jenc) + jsonEndMark)
-				}
-			}
-		} else if tmark == "~pv:" {
-			// replace the template with the real value
-			newval := getFieldValue(value[4:], testCache).Interface()
-			if reflect.TypeOf(newval).Kind() == reflect.String {
-				// the replacement value is also a string
-				copy.SetString(newval.(string))
-			} else {
-				// encode the replacement value as JSON string (to be decoded later)
-				jenc, err := json.Marshal(newval)
-				if err == nil {
-					copy.SetString(jsonStartMark + string(jenc) + jsonEndMark)
-				}
-			}
-		} else {
-			// this is not a template; copy the value
-			copy.Set(original)
-		}
+		processString(copy, original)
 
 	// And everything else will simply be taken from the original
 	default:
+		copy.Set(original)
+	}
+}
+
+// processPtr process the Ptr case
+func processPtr(copy, original reflect.Value) {
+	// To get the actual value of the original we have to call Elem()
+	// At the same time this unwraps the pointer so we don't end up in
+	// an infinite recursion
+	originalValue := original.Elem()
+	// Check if the pointer is nil
+	if !originalValue.IsValid() {
+		return
+	}
+	// Allocate a new object and set the pointer to it
+	copy.Set(reflect.New(originalValue.Type()))
+	// Unwrap the newly created pointer
+	processTemplates(copy.Elem(), originalValue)
+}
+
+// processInterface process the Interface case
+func processInterface(copy, original reflect.Value) {
+	// Get rid of the wrapping interface
+	originalValue := original.Elem()
+	// Check if the pointer is nil
+	if !originalValue.IsValid() {
+		return
+	}
+	// Create a new object. Now new gives us a pointer, but we want the value it
+	// points to, so we have to call Elem() to unwrap it
+	copyValue := reflect.New(originalValue.Type()).Elem()
+	processTemplates(copyValue, originalValue)
+	copy.Set(copyValue)
+}
+
+// processStruct process the Struct case
+func processStruct(copy, original reflect.Value) {
+	for i := 0; i < original.NumField(); i++ {
+		processTemplates(copy.Field(i), original.Field(i))
+	}
+}
+
+// processSlice process the Slice case
+func processSlice(copy, original reflect.Value) {
+	copy.Set(reflect.MakeSlice(original.Type(), original.Len(), original.Cap()))
+	for i := 0; i < original.Len(); i++ {
+		processTemplates(copy.Index(i), original.Index(i))
+	}
+}
+
+// processMap process the Map case
+func processMap(copy, original reflect.Value) {
+	copy.Set(reflect.MakeMap(original.Type()))
+	for _, key := range original.MapKeys() {
+		originalValue := original.MapIndex(key)
+		// New gives us a pointer, but again we want the value
+		copyValue := reflect.New(originalValue.Type()).Elem()
+		processTemplates(copyValue, originalValue)
+		copy.SetMapIndex(key, copyValue)
+	}
+}
+
+// processString process the String case
+func processString(copy, original reflect.Value) {
+	value := original.Interface().(string)
+	tmark := value[0:int(math.Min(float64(len(value)), float64(4)))] // template marker
+	if tmark == "~ts:" {
+		// replace the template with the current time
+		t := time.Now().UTC()
+		// extract time format
+		timeFormat := value[4:]
+		if timeFormat != "" {
+			copy.SetString(t.Format(timeFormat))
+		} else {
+			// unix timestamp in seconds
+			jenc, err := json.Marshal(int32(t.Unix()))
+			if err == nil {
+				copy.SetString(jsonStartMark + string(jenc) + jsonEndMark)
+			}
+		}
+	} else if tmark == "~pv:" {
+		// replace the template with the real value
+		newval := getFieldValue(value[4:], testCache).Interface()
+		if reflect.TypeOf(newval).Kind() == reflect.String {
+			// the replacement value is also a string
+			copy.SetString(newval.(string))
+		} else {
+			// encode the replacement value as JSON string (to be decoded later)
+			jenc, err := json.Marshal(newval)
+			if err == nil {
+				copy.SetString(jsonStartMark + string(jenc) + jsonEndMark)
+			}
+		}
+	} else {
+		// this is not a template; copy the value
 		copy.Set(original)
 	}
 }
