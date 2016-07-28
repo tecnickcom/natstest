@@ -93,7 +93,7 @@ The service can be started by issuing the following command (*with the right par
 natstest --serverAddress=":8080" --natsAddress="nats://127.0.0.1:4222"
 ```
 
-If no command-line parameters are specified, then the ones in the configuration file (**config.json**) will be used. \
+If no command-line parameters are specified, then the ones in the configuration file (**config.json**) will be used.  
 The configuration files can be stored in the current directory or in any of the following (in order of precedence):
 * ./
 * config/
@@ -101,7 +101,7 @@ The configuration files can be stored in the current directory or in any of the 
 * /etc/natstest/
 
 
-This service also support secure remote configuration via [Consul](https://www.consul.io/) or [Etcd](https://github.com/coreos/etcd). \
+This service also support secure remote configuration via [Consul](https://www.consul.io/) or [Etcd](https://github.com/coreos/etcd).  
 The remote configuration server can be defined either in the local configuration file using the following parameters, or with environment variables:
 
 * **remoteConfigProvider** : remote configuration source ("consul", "etcd");
@@ -134,8 +134,8 @@ The natstest HTTP RESTful API always returns a JSON message with the following f
 
 ![HTTP JSON API Response Format](doc/images/natstest_httpjson.png)
 
-The available tests are specified using JSON configuration files with the following naming syntax: \
-**test_TESTNAME.json** \
+The available tests are specified using JSON configuration files with the following naming syntax:  
+**test_TESTNAME.json**  
 The TESTNAME may contains characters from 'a' to 'z', numbers from '0' to '9' and the character '@' used only for internal testing.
 
 ![Test format](doc/images/natstest_test_format.png)
@@ -147,26 +147,26 @@ Each configuration file contains a sequence (an array or slice) of RAW messages 
 
 Each field in the *Request* and *Response* section of a test message supports templates in addition to fixed values:
 
-* **Regular Expression** (only for Response) \
-A regular expression is identified by the “~re:” prefix. \
-For example, the following regular expression matches any integer number: \
+* **Regular Expression** (only for Response)  
+A regular expression is identified by the “~re:” prefix.  
+For example, the following regular expression matches any integer number:  
 *"fieldA" : "~re:[0-­9]+"*
 
-* **TimeStamp** \
-We can add the current UTC timestamp by using the “~ts:” prefix followed by the time format as defined in https://golang.org/pkg/time, or without format to get the Unix timestamp in seconds. \
-For example: \
-*"unixTimestamp" : "~ts:", \
-*"time" : "~ts:15:04:05" \
+* **TimeStamp**  
+We can add the current UTC timestamp by using the “~ts:” prefix followed by the time format as defined in https://golang.org/pkg/time, or without format to get the Unix timestamp in seconds.  
+For example:  
+*"unixTimestamp" : "~ts:",  
+*"time" : "~ts:15:04:05"  
 
-* **Previous Value** \
-We can refer to any previously returned value by using the “~pv:” prefix followed by the path to the the reference field. \
-For example, the following refers to the value of someField in the Response section of the fourth message (the message index starts from zero): \
+* **Previous Value**  
+We can refer to any previously returned value by using the “~pv:” prefix followed by the path to the the reference field.  
+For example, the following refers to the value of someField in the Response section of the fourth message (the message index starts from zero):  
 *"fieldB" : "~pv:3.Response.someField"*
 
-* **Tranformed Previous Value** \
-The Previous Values as described above can be transformed by an external command-line application using the syntax as in the following example: \
-*"fieldC" : "~pv:6.Response.anotherField>/bin/echo ­n %v"* \
-In this example the command line application is “/bin/echo” and the previous value is passed as argument (”%v” placeholder). \
+* **Tranformed Previous Value**  
+The Previous Values as described above can be transformed by an external command-line application using the syntax as in the following example:  
+*"fieldC" : "~pv:6.Response.anotherField>/bin/echo ­n %v"*  
+In this example the command line application is “/bin/echo” and the previous value is passed as argument (”%v” placeholder).  
 The allowed external command-line applications are defined in the configuration file.
 
 ## Command-line API Examples
@@ -202,16 +202,16 @@ The tests can be triggered manually via the HTTP interface, automatically via CI
 
 The types of test to be performed can be divided in two categories:
 
-* **Topic testing** \
-The aim of this is to test in isolation each topic of each service attached to the *NATS* bus. \
-This requires a test configuration file for each individual service, containing one or more messages for each topic to test. The test should be named: *test_servicename.json* \
-This type of test can be seen as analogue to *unit testing*, so the developer should be responsible for keeping it consistent with the code base. \
+* **Topic testing**  
+The aim of this is to test in isolation each topic of each service attached to the *NATS* bus.  
+This requires a test configuration file for each individual service, containing one or more messages for each topic to test. The test should be named: *test_servicename.json*  
+This type of test can be seen as analogue to *unit testing*, so the developer should be responsible for keeping it consistent with the code base.  
 If a particular topic message requires the information provided by another service and it is not possible to mock it, then it should be tested using the *functional testing* described hereinafter.
 
-* **Functional testing** \
-The aim of this is to test functionalities which involve the use of multiple services. \
-This requires a test configuration file for each functionality to test. The test should be named: *test_functionname.json* \
-As in the traditional functional testing, each test is equivalent to a scenario. \
+* **Functional testing**  
+The aim of this is to test functionalities which involve the use of multiple services.  
+This requires a test configuration file for each functionality to test. The test should be named: *test_functionname.json*  
+As in the traditional functional testing, each test is equivalent to a scenario.  
 It is likely that the *Request* messages contains values or transformation of values returned by previous message interactions. In this case the developers should provide the required command-line transformation applications. The full path of each authorized transformation application needs to be added in the *"validTransfCmd"* list inside the *config.json* configuration file.
 
 
