@@ -23,6 +23,7 @@ func cli() (*cobra.Command, error) {
 	// overwrites the configuration parameters with the ones specified in the command line (if any)
 	rootCmd.Flags().StringVarP(&appParams.serverAddress, "serverAddress", "s", cfgParams.serverAddress, "HTTP API URL (ip:port) or just (:port)")
 	rootCmd.Flags().StringVarP(&appParams.natsAddress, "natsAddress", "n", cfgParams.natsAddress, "NATS bus Address (nats://ip:port)")
+	rootCmd.Flags().StringVarP(&appParams.logLevel, "logLevel", "l", cfgParams.logLevel, "Log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG")
 
 	for _, cmd := range cfgParams.validTransfCmd {
 		isValidTransfCmd[cmd] = true

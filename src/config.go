@@ -25,6 +25,7 @@ type params struct {
 	serverAddress  string   // HTTP API URL (ip:port) or just (:port)
 	natsAddress    string   // NATS bus Address (nats://ip:port)
 	validTransfCmd []string // list of valid transformation commands
+	logLevel       string   // Log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
 }
 
 // getConfigParams returns the configuration parameters
@@ -47,6 +48,7 @@ func getLocalConfigParams() (cfg params, rcfg remoteConfigParams) {
 	viper.SetDefault("serverAddress", ServerAddress)
 	viper.SetDefault("natsAddress", NatsAddress)
 	viper.SetDefault("validTransfCmd", ValidTransfCmd)
+	viper.SetDefault("logLevel", LogLevel)
 
 	// name of the configuration file without extension
 	viper.SetConfigName("config")
@@ -67,6 +69,7 @@ func getLocalConfigParams() (cfg params, rcfg remoteConfigParams) {
 		serverAddress:  viper.GetString("serverAddress"),
 		natsAddress:    viper.GetString("natsAddress"),
 		validTransfCmd: viper.GetStringSlice("validTransfCmd"),
+		logLevel:       viper.GetString("logLevel"),
 	}
 
 	// support environment variables for the remote configuration
@@ -100,6 +103,7 @@ func getRemoteConfigParams(cfg params, rcfg remoteConfigParams) (params, error) 
 	viper.SetDefault("serverAddress", cfg.serverAddress)
 	viper.SetDefault("natsAddress", cfg.natsAddress)
 	viper.SetDefault("validTransfCmd", cfg.validTransfCmd)
+	viper.SetDefault("logLevel", cfg.logLevel)
 
 	// configuration type
 	viper.SetConfigType("json")
@@ -124,6 +128,7 @@ func getRemoteConfigParams(cfg params, rcfg remoteConfigParams) (params, error) 
 			serverAddress:  viper.GetString("serverAddress"),
 			natsAddress:    viper.GetString("natsAddress"),
 			validTransfCmd: viper.GetStringSlice("validTransfCmd"),
+			logLevel:       viper.GetString("logLevel"),
 		},
 		nil
 }
@@ -131,10 +136,18 @@ func getRemoteConfigParams(cfg params, rcfg remoteConfigParams) (params, error) 
 // checkParams cheks if the configuration parameters are valid
 func checkParams(appParams *params) error {
 	if appParams.serverAddress == "" {
-		return errors.New("The Server address is empty")
+		return errors.New("serverAddress is empty")
 	}
 	if appParams.natsAddress == "" {
-		return errors.New("The NATS bus address is empty")
+		return errors.New("natsAddress is empty")
 	}
+	if appParams.logLevel == "" {
+		return errors.New("logLevel is empty")
+	}
+	levelNum, ok := logLevelCodes[appParams.logLevel]
+	if !ok {
+		return errors.New("The logLevel must be one of the following: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG")
+	}
+	logLevelCode = levelNum
 	return nil
 }

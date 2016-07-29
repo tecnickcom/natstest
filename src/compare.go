@@ -21,7 +21,7 @@ func areMatching(expected interface{}, actual interface{}) (err error) {
 // in "expected" are defined and have the same value in "actual"
 func checkMatch(expected reflect.Value, actual reflect.Value) (err error) {
 
-	if expected.Kind() != actual.Kind() && expected.Kind() != reflect.String {
+	if (expected.Kind() != actual.Kind()) && (expected.Kind() != reflect.String) {
 		return getFormattedDiffError("the types are different", expected, actual)
 	}
 

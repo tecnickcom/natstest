@@ -8,5 +8,6 @@
     "validTransfCmd" : [
         "/bin/cat",
         "/bin/echo"
-    ]
+    ],
+    "logLevel" : "DEBUG"
 }

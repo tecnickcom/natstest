@@ -79,8 +79,9 @@ Available Commands:
   version     print this program version
 
 Flags:
-  -n, --natsAddress string     NATS bus Address (nats://ip:port) (default "nats://127.0.0.1:4222")
-  -s, --serverAddress string   HTTP API URL (ip:port) or just (:port) (default ":8081")
+  -n, --natsAddress   string  NATS bus Address (nats://ip:port) (default "nats://127.0.0.1:4222")
+  -s, --serverAddress string  HTTP API URL (ip:port) or just (:port) (default ":8081")
+  -l, --logLevel      string  Log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
 
 Use "natstest [command] --help" for more information about a command.
 ```
@@ -90,7 +91,7 @@ Use "natstest [command] --help" for more information about a command.
 The service can be started by issuing the following command (*with the right parameters*):
 
 ```
-natstest --serverAddress=":8080" --natsAddress="nats://127.0.0.1:4222"
+natstest --serverAddress=":8080" --natsAddress="nats://127.0.0.1:4222 --logLevel=DEBUG"
 ```
 
 If no command-line parameters are specified, then the ones in the configuration file (**config.json**) will be used.  
@@ -220,16 +221,16 @@ It is likely that the *Request* messages contains values or transformation of va
 This service logs the log messages in the *Stderr* or *Stdout* using the syslog prefixes:
 
 
-| PREFIX                            | LEVEL | DESCRIPTION                                                                            | OUTPUT |
-|:--------------------------------- |:-----:|:-------------------------------------------------------------------------------------- |:------:|
-|<nobr> [EMERG] [NATSTEST]   </nobr>|   0   |<nobr> **Emergency**: System is unusable                                         </nobr>| Stderr |
-|<nobr> [ALERT] [NATSTEST]   </nobr>|   1   |<nobr> **Alert**: Should be corrected immediately                                </nobr>| Stderr |
-|<nobr> [CRIT] [NATSTEST]    </nobr>|   2   |<nobr> **Critical**: Critical conditions                                         </nobr>| Stderr |
-|<nobr> [ERR] [NATSTEST]     </nobr>|   3   |<nobr> **Error**: Error conditions                                               </nobr>| Stderr |
-|<nobr> [WARNING] [NATSTEST] </nobr>|   4   |<nobr> **Warning**: May indicate that an error will occur if action is not taken </nobr>| Stderr |
-|<nobr> [NOTICE] [NATSTEST]  </nobr>|   5   |<nobr> **Notice**: Events that are unusual, but not error conditions             </nobr>| Stderr |
-|<nobr> [INFO] [NATSTEST]    </nobr>|   6   |<nobr> **Informational**: Normal operational messages that require no action     </nobr>| Stdout |
-|<nobr> [DEBUG] [NATSTEST]   </nobr>|   7   |<nobr> **Debug**: Information useful to developers for debugging the application </nobr>| Stderr |
+| PREFIX                              | LEVEL | DESCRIPTION                                                                            | OUTPUT |
+|:----------------------------------- |:-----:|:-------------------------------------------------------------------------------------- |:------:|
+|<nobr> [EMERGENCY] [natstest] </nobr>|   0   |<nobr> **Emergency**: System is unusable                                         </nobr>| Stderr |
+|<nobr> [ALERT] [natstest]     </nobr>|   1   |<nobr> **Alert**: Should be corrected immediately                                </nobr>| Stderr |
+|<nobr> [CRITICAL] [natstest]  </nobr>|   2   |<nobr> **Critical**: Critical conditions                                         </nobr>| Stderr |
+|<nobr> [ERROR] [natstest]     </nobr>|   3   |<nobr> **Error**: Error conditions                                               </nobr>| Stderr |
+|<nobr> [WARNING] [natstest]   </nobr>|   4   |<nobr> **Warning**: May indicate that an error will occur if action is not taken </nobr>| Stderr |
+|<nobr> [NOTICE] [natstest]    </nobr>|   5   |<nobr> **Notice**: Events that are unusual, but not error conditions             </nobr>| Stderr |
+|<nobr> [INFO] [natstest]      </nobr>|   6   |<nobr> **Informational**: Normal operational messages that require no action     </nobr>| Stdout |
+|<nobr> [DEBUG] [natstest]     </nobr>|   7   |<nobr> **Debug**: Information useful to developers for debugging the application </nobr>| Stderr |
 
 
 ## Developer(s) Contact

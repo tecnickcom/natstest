@@ -220,7 +220,7 @@ func getFieldValue(path string, data interface{}) reflect.Value {
 	if len(parts) == 2 {
 		val, err := execTransfCmd(parts[1], cache)
 		if err != nil {
-			errLog.Printf("%v", err)
+			Log(ERROR, "%v", err)
 		}
 		return val
 	}

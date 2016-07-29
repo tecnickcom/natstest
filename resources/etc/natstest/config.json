@@ -9,5 +9,6 @@
         "/bin/cat",
         "/bin/echo",
         "/usr/bin/md5str.sh"
-    ]
+    ],
+    "logLevel" : "INFO"
 }

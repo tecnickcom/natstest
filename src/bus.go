@@ -13,13 +13,13 @@ var natsConn *nats.Conn
 
 // connect to the NATS bus
 func initNatsBus(addr string) {
-	infoLog.Printf("initializing the NATS bus: '%s'", addr)
+	Log(INFO, "initializing the NATS bus: '%s'", addr)
 	natsOpts.Servers = []string{addr}
 }
 
 // connect to the NATS bus
 func openNatsBus() (err error) {
-	infoLog.Printf("connecting to NATS bus")
+	Log(INFO, "connecting to NATS bus")
 	natsConn, err = natsOpts.Connect()
 	if err != nil {
 		return fmt.Errorf("Can't connect to the NATS message queue %v", err)
@@ -29,7 +29,7 @@ func openNatsBus() (err error) {
 
 // close the NATS bus
 func closeNatsBus() {
-	infoLog.Printf("closing the connection to the NATS bus")
+	Log(INFO, "closing the connection to the NATS bus")
 	natsConn.Flush()
 	natsConn.Close()
 }

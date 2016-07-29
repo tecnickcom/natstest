@@ -16,6 +16,8 @@ import (
 var emptyParamCases = []string{
 	"--serverAddress=",
 	"--natsAddress=",
+	"--logLevel=",
+	"--logLevel=INVALID",
 }
 
 func TestCliEmptyParamError(t *testing.T) {
@@ -43,7 +45,7 @@ func TestCliEmptyParamError(t *testing.T) {
 }
 
 func TestCliNoConfigError(t *testing.T) {
-	os.Args = []string{"natstest", "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:3334"}
+	os.Args = []string{"natstest", "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:3334", "--logLevel=DEBUG"}
 	cmd, err := cli()
 	if err != nil {
 		t.Error(fmt.Errorf("An error wasn't expected: %v", err))
@@ -78,7 +80,7 @@ func TestCliNoConfigError(t *testing.T) {
 }
 
 func TestCli(t *testing.T) {
-	os.Args = []string{"natstest", "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:4222"}
+	os.Args = []string{"natstest", "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:4222", "--logLevel=DEBUG"}
 	cmd, err := cli()
 	if err != nil {
 		t.Error(fmt.Errorf("An error wasn't expected: %v", err))
