@@ -90,6 +90,9 @@ CCTARGETS=darwin/386 darwin/amd64 freebsd/386 freebsd/amd64 freebsd/arm linux/38
 # docker image name for consul (used during testing)
 CONSUL_DOCKER_IMAGE_NAME=consul_$(OWNER)_$(PROJECT)$(DOCKERSUFFIX)
 
+# docker image name for NATS (used during testing)
+NATS_DOCKER_IMAGE_NAME=nats_$(OWNER)_$(PROJECT)$(DOCKERSUFFIX)
+
 # --- MAKE TARGETS ---
 
 # Display general help about this command
@@ -353,16 +356,22 @@ docker: build
 dockertest:
 	# clean previous docker containers (if any)
 	rm -f target/old_docker_containers.id
+	docker ps -a | grep $(NATS_DOCKER_IMAGE_NAME) | awk '{print $$1}' >> target/old_docker_containers.id || true
 	docker ps -a | grep $(CONSUL_DOCKER_IMAGE_NAME) | awk '{print $$1}' >> target/old_docker_containers.id || true
 	docker ps -a | grep $(OWNER)/$(PROJECT)$(DOCKERSUFFIX) | awk '{print $$1}' >> target/old_docker_containers.id || true
 	docker stop `cat target/old_docker_containers.id` 2> /dev/null || true
 	docker rm `cat target/old_docker_containers.id` 2> /dev/null || true
+	# start a NATS service inside a container
+	docker run --detach=true --name=$(NATS_DOCKER_IMAGE_NAME)_$(VERSION)-$(RELEASE) --publish=4222 --hostname=test.nats nats > target/nats_docker_container.id
 	# start a Consul service inside a container
 	docker run --detach=true --name=$(CONSUL_DOCKER_IMAGE_NAME)_$(VERSION)-$(RELEASE) --publish=8500 --hostname=test.consul progrium/consul -server -bootstrap > target/consul_docker_container.id
 	sleep 5
-	# push Consul configuration
+	# Get Docker ports
+	docker inspect --format='{{(index (index .NetworkSettings.Ports "4222/tcp") 0).HostPort}}' `cat target/nats_docker_container.id` > target/nats_docker_container.port
 	docker inspect --format='{{(index (index .NetworkSettings.Ports "8500/tcp") 0).HostPort}}' `cat target/consul_docker_container.id` > target/consul_docker_container.port
-	curl -X PUT -d '{"serverAddress":":9876","natsAddress":"nats://127.0.0.1:4222","validTransfCmd":["/bin/cat","/bin/echo"]}' http://127.0.0.1:`cat target/consul_docker_container.port`/v1/kv/config/natstest
+	# push Consul configuration
+	curl -X PUT -d '{"serverAddress":":9876","natsAddress":"nats://127.0.0.1:'`cat target/nats_docker_container.port`'","validTransfCmd":["/bin/cat","/bin/echo"]}' http://127.0.0.1:`cat target/consul_docker_container.port`/v1/kv/config/natstest
+	# Start natstest container
 	docker run --detach=true --net="host" --tty=true \
 	--env="NATSTEST_REMOTECONFIGPROVIDER=consul" \
 	--env="NATSTEST_REMOTECONFIGENDPOINT=127.0.0.1:`cat target/consul_docker_container.port`" \
@@ -377,6 +386,8 @@ dockertest:
 	docker rm `cat target/project_docker_container.id` 2> /dev/null || true
 	docker stop `cat target/consul_docker_container.id` 2> /dev/null || true
 	docker rm `cat target/consul_docker_container.id` 2> /dev/null || true
+	docker stop `cat target/nats_docker_container.id` 2> /dev/null || true
+	docker rm `cat target/nats_docker_container.id` 2> /dev/null || true
 	@exit `grep -ic "false" target/project_docker_container.run`
 
 # build everything inside a Docker container
