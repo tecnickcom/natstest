@@ -229,7 +229,7 @@ This service logs the log messages in the *Stderr* or *Stdout* using the syslog 
 |<nobr> [ERROR] [natstest]     </nobr>|   3   |<nobr> **Error**: Error conditions                                               </nobr>| Stderr |
 |<nobr> [WARNING] [natstest]   </nobr>|   4   |<nobr> **Warning**: May indicate that an error will occur if action is not taken </nobr>| Stderr |
 |<nobr> [NOTICE] [natstest]    </nobr>|   5   |<nobr> **Notice**: Events that are unusual, but not error conditions             </nobr>| Stderr |
-|<nobr> [INFO] [natstest]      </nobr>|   6   |<nobr> **Informational**: Normal operational messages that require no action     </nobr>| Stdout |
+|<nobr> [INFO] [natstest]      </nobr>|   6   |<nobr> **Informational**: Normal operational messages that require no action     </nobr>| Stderr |
 |<nobr> [DEBUG] [natstest]     </nobr>|   7   |<nobr> **Debug**: Information useful to developers for debugging the application </nobr>| Stderr |
 
 
