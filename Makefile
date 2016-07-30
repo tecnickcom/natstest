@@ -186,7 +186,7 @@ misspell:
 # AST scanner
 astscan:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) gas -nosec=true ./... | tee target/report/astscan.txt
+	GOPATH=$(GOPATH) gas --nosec=true ./... | tee target/report/astscan.txt
 
 # Generate source docs
 docs:

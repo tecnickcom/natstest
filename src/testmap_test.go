@@ -30,7 +30,7 @@ func TestLoadTestMapError1(t *testing.T) {
 func loadTestMapErrorTesting(t *testing.T, mode os.FileMode) {
 	tmpdir := "../target/tmp/"
 	os.RemoveAll(tmpdir)
-	os.MkdirAll(tmpdir, 0755)
+	os.MkdirAll(tmpdir, 0700)
 	defer os.RemoveAll(tmpdir)
 	data := []byte("[{")
 	file := tmpdir + "test_@error.json"

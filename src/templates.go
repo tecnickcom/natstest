@@ -41,7 +41,10 @@ func replaceTemplates(obj interface{}) (interface{}, error) {
 	search := regexp.MustCompile("(?U)\"" + jsonStartMark + ".*" + jsonEndMark + "\"")
 	jsoncopy = search.ReplaceAllFunc(jsoncopy, func(str []byte) []byte {
 		str = str[(len(jsonStartMark) + 1):(len(str) - len(jsonEndMark) - 1)]
-		ustr, _ := strconv.Unquote("\"" + string(str) + "\"")
+		ustr, err := strconv.Unquote("\"" + string(str) + "\"")
+		if err != nil {
+			return []byte("\"\"")
+		}
 		return []byte(ustr)
 	})
 
@@ -239,6 +242,7 @@ func execTransfCmd(template string, value reflect.Value) (reflect.Value, error) 
 	}
 	args := parts[1:]
 	out, err := exec.Command(parts[0], args...).Output()
+	// #nosec
 	if err != nil {
 		return value, fmt.Errorf("unable to run the command: %v -- [%v]", command, err)
 	}

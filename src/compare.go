@@ -106,7 +106,10 @@ func processCompareDefault(expected reflect.Value, actual reflect.Value) (err er
 	}
 	// compare using a regular expression
 	sv := fmt.Sprintf("%v", actual.Interface())
-	match, _ := regexp.MatchString(value[4:], sv)
+	match, err := regexp.MatchString(value[4:], sv)
+	if err != nil {
+		return fmt.Errorf("%v", err)
+	}
 	if !match {
 		return getFormattedDiffError("the regular expression do not match", expected, actual)
 	}
@@ -125,6 +128,9 @@ func getFormattedDiffError(message string, expected interface{}, actual interfac
 		Expected: expected,
 		Actual:   actual,
 	}
-	errmsg, _ := json.Marshal(errStruct)
+	errmsg, err := json.Marshal(errStruct)
+	if err != nil {
+		return fmt.Errorf("%v", err)
+	}
 	return fmt.Errorf("%s", string(errmsg))
 }
