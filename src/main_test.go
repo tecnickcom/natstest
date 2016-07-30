@@ -9,10 +9,13 @@ import (
 	"testing"
 )
 
-func getMainOutput() string {
+func getMainOutput() (string, error) {
 	old := os.Stdout // keep backup of the real stdout
 	defer func() { os.Stdout = old }()
-	r, w, _ := os.Pipe()
+	r, w, err := os.Pipe()
+	if err != nil {
+		return "", err
+	}
 	os.Stdout = w
 
 	// execute the main function
@@ -30,15 +33,21 @@ func getMainOutput() string {
 	w.Close()
 	out := <-outC
 
-	return out
+	return out, nil
 }
 
 func TestMainVersion(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"natstest", "version"}
-	out := getMainOutput()
-	match, _ := regexp.MatchString("^[\\d]+\\.[\\d]+\\.[\\d]+[\\s]*$", out)
+	out, err := getMainOutput()
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
+	}
+	match, err := regexp.MatchString("^[\\d]+\\.[\\d]+\\.[\\d]+[\\s]*$", out)
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
+	}
 	if !match {
 		t.Error(fmt.Errorf("The version has an invalid format"))
 	}
