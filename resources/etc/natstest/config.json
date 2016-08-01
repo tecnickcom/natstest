@@ -10,5 +10,5 @@
         "/bin/echo",
         "/usr/bin/md5str.sh"
     ],
-    "logLevel" : "INFO"
+    "logLevel" : "info"
 }

@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // validTransfCommandMap is a map containing the list of valid transformation commands
@@ -223,7 +225,9 @@ func getFieldValue(path string, data interface{}) reflect.Value {
 	if len(parts) == 2 {
 		val, err := execTransfCmd(parts[1], cache)
 		if err != nil {
-			Log(ERROR, "%v", err)
+			log.WithFields(log.Fields{
+				"error": err,
+			}).Error("unable to execute the trasformation command")
 		}
 		return val
 	}

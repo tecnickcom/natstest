@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/nats-io/nats"
 )
 
@@ -13,13 +14,17 @@ var natsConn *nats.Conn
 
 // connect to the NATS bus
 func initNatsBus(addr string) {
-	Log(INFO, "initializing the NATS bus: '%s'", addr)
+	log.WithFields(log.Fields{
+		"nats": addr,
+	}).Info("initializing NATS bus")
 	natsOpts.Servers = []string{addr}
 }
 
 // connect to the NATS bus
 func openNatsBus() (err error) {
-	Log(INFO, "connecting to NATS bus")
+	log.WithFields(log.Fields{
+		"nats": natsOpts.Servers,
+	}).Info("opening NATS bus connection")
 	natsConn, err = natsOpts.Connect()
 	if err != nil {
 		return fmt.Errorf("Can't connect to the NATS message queue %v", err)
@@ -29,7 +34,9 @@ func openNatsBus() (err error) {
 
 // close the NATS bus
 func closeNatsBus() {
-	Log(INFO, "closing the connection to the NATS bus")
+	log.WithFields(log.Fields{
+		"nats": natsOpts.Servers,
+	}).Info("closing NATS bus connection")
 	natsConn.Flush()
 	natsConn.Close()
 }

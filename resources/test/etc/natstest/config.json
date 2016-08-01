@@ -9,5 +9,5 @@
         "/bin/cat",
         "/bin/echo"
     ],
-    "logLevel" : "DEBUG"
+    "logLevel" : "debug"
 }

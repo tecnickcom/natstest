@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
 )
@@ -144,10 +145,10 @@ func checkParams(appParams *params) error {
 	if appParams.logLevel == "" {
 		return errors.New("logLevel is empty")
 	}
-	levelNum, ok := logLevelCodes[appParams.logLevel]
-	if !ok {
-		return errors.New("The logLevel must be one of the following: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG")
+	levelCode, err := log.ParseLevel(appParams.logLevel)
+	if err != nil {
+		return errors.New("The logLevel must be one of the following: panic, fatal, error, warning, info, debug")
 	}
-	logLevelCode = levelNum
+	log.SetLevel(levelCode)
 	return nil
 }

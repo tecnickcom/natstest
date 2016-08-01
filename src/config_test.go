@@ -30,7 +30,7 @@ func TestGetConfigParams(t *testing.T) {
 	if prm.natsAddress != "nats://127.0.0.1:4222" {
 		t.Error(fmt.Errorf("Found different natsAddress than expected"))
 	}
-	if prm.logLevel != "DEBUG" {
+	if prm.logLevel != "debug" {
 		t.Error(fmt.Errorf("Found different logLevel than expected"))
 	}
 }
@@ -62,7 +62,7 @@ func TestGetLocalConfigParams(t *testing.T) {
 	if prm.natsAddress != "nats://127.0.0.1:4222" {
 		t.Error(fmt.Errorf("Found different natsAddress than expected"))
 	}
-	if prm.logLevel != "DEBUG" {
+	if prm.logLevel != "debug" {
 		t.Error(fmt.Errorf("Found different logLevel than expected"))
 	}
 	if rprm.remoteConfigProvider != "consul" {
@@ -126,7 +126,7 @@ func TestGetConfigParamsRemote(t *testing.T) {
 	if prm.natsAddress != "nats://127.0.0.1:4222" {
 		t.Error(fmt.Errorf("Found different natsAddress than expected"))
 	}
-	if prm.logLevel != "DEBUG" {
+	if prm.logLevel != "debug" {
 		t.Error(fmt.Errorf("Found different logLevel than expected"))
 	}
 }
