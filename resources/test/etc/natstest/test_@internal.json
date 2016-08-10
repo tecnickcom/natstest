@@ -45,7 +45,7 @@
 		"Request" : {
 			"integer" : 123,
 			"name" : "some string",
-			"previousReturnedValue" : "~pv:0.Response.name>/bin/echo -n %v",
+			"previousReturnedValue" : "~pv:0.Response.name>/bin/echo -n %s",
 			"array" : [
 				{
 					"key1" : "value2",

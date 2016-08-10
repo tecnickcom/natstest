@@ -222,6 +222,7 @@ func getFieldValue(path string, data interface{}) reflect.Value {
 			cache = cache.Index(idx)
 		}
 	}
+	// process the transformation (if any)
 	if len(parts) == 2 {
 		val, err := execTransfCmd(parts[1], cache)
 		if err != nil {
@@ -236,7 +237,18 @@ func getFieldValue(path string, data interface{}) reflect.Value {
 
 // execTransfCmd execute the specified command template
 func execTransfCmd(template string, value reflect.Value) (reflect.Value, error) {
-	command := fmt.Sprintf(template, value.Interface())
+	var strvalue string
+	if reflect.TypeOf(value.Interface()).Kind() == reflect.String {
+		strvalue = value.Interface().(string)
+	} else {
+		// encode the object as JSON string
+		jsonval, err := json.Marshal(value.Interface())
+		if err != nil {
+			return value, fmt.Errorf("unable to json-encode the value: %#v -- [%v]", value.Interface(), err)
+		}
+		strvalue = string(jsonval)
+	}
+	command := fmt.Sprintf(template, strvalue)
 	parts := strings.Fields(command)
 	if len(parts) == 1 {
 		return value, fmt.Errorf("the command is missing arguments: %v", command)

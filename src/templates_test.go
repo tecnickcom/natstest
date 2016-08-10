@@ -15,6 +15,15 @@ func TestGetFieldValueArray(t *testing.T) {
 	}
 }
 
+func TestGetFieldValueArrayTransf(t *testing.T) {
+	val := getFieldValue("0.Response.array>/bin/echo -n %s", testMap["@internal"])
+	result := fmt.Sprintf("%#v", val)
+	expected := "\"[{\\\"key1\\\":\\\"value2\\\",\\\"key2\\\":\\\"beta\\\"},{\\\"key1\\\":\\\"value2\\\",\\\"key2\\\":\\\"value2 test string\\\"}]\""
+	if result != expected {
+		t.Error(fmt.Errorf("Found different value than expected: %#v", result))
+	}
+}
+
 func TestGetFieldValueString(t *testing.T) {
 	val := getFieldValue("0.Request.array.1.key2", testMap["@internal"])
 	if val.Interface().(string) != "value2 test string" {
@@ -109,11 +118,11 @@ func TestPocessTemplatesErrors(t *testing.T) {
 }
 
 func TestExecCmdTemplate(t *testing.T) {
-	ret, err := execTransfCmd("/bin/echo -n $%v", reflect.ValueOf("ciao ciao"))
+	ret, err := execTransfCmd("/bin/echo -n %s", reflect.ValueOf("ciao \"'\\ ciao"))
 	if err != nil {
 		t.Error(fmt.Errorf("an error was not expected: %v", err))
 	}
-	if ret.Interface().(string) != "$ciao ciao" {
+	if ret.Interface().(string) != "ciao \"'\\ ciao" {
 		t.Error(fmt.Errorf("a different return value was expected"))
 	}
 }
@@ -124,7 +133,7 @@ func TestExecCmdTemplateErr(t *testing.T) {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
 
-	ret, err = execTransfCmd("/bin/cat -l %v", reflect.ValueOf("dog"))
+	ret, err = execTransfCmd("/bin/cat -l %s", reflect.ValueOf("dog"))
 	if err == nil {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
