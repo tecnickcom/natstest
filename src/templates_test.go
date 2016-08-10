@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+func TestGetFieldValueArray(t *testing.T) {
+	val := getFieldValue("0.Response.array", testMap["@internal"])
+	result := fmt.Sprintf("%#v", val)
+	expected := "[]interface {}{map[string]interface {}{\"key1\":\"value2\", \"key2\":\"beta\"}, map[string]interface {}{\"key1\":\"value2\", \"key2\":\"value2 test string\"}}"
+	if result != expected {
+		t.Error(fmt.Errorf("Found different value than expected: %v", result))
+	}
+}
+
 func TestGetFieldValueString(t *testing.T) {
 	val := getFieldValue("0.Request.array.1.key2", testMap["@internal"])
 	if val.Interface().(string) != "value2 test string" {
