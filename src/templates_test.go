@@ -14,9 +14,23 @@ func TestGetFieldValueArray(t *testing.T) {
 	}
 }
 
-func TestGetFieldValueArrayTransf(t *testing.T) {
+func TestGetFieldValueTransfRequest(t *testing.T) {
+	val := getFieldValue("0.Request>/bin/echo -n %v", testMap["@internal"])
+	if !strings.Contains(val.Interface().(string), "submap") {
+		t.Error(fmt.Errorf("Found different value than expected: %#v", val))
+	}
+}
+
+func TestGetFieldValueTransfArray(t *testing.T) {
 	val := getFieldValue("0.Response.array>/bin/echo -n %v", testMap["@internal"])
 	if !strings.Contains(val.Interface().(string), "value2 test string") {
+		t.Error(fmt.Errorf("Found different value than expected: %#v", val))
+	}
+}
+
+func TestGetFieldValueTransfInt(t *testing.T) {
+	val := getFieldValue("0.Request.integer>/bin/echo -n %v", testMap["@internal"])
+	if !strings.Contains(val.Interface().(string), "123") {
 		t.Error(fmt.Errorf("Found different value than expected: %#v", val))
 	}
 }
@@ -127,11 +141,15 @@ func TestExecCmdTemplate(t *testing.T) {
 func TestExecCmdTemplateErr(t *testing.T) {
 	ret, err := execTransfCmd("/bin/cat -l %v", reflect.ValueOf("no_file"))
 	if err == nil {
-		t.Error(fmt.Errorf("an error was expected"))
+		t.Error(fmt.Errorf("an error was expected (missing file)"))
 	}
-	ret, err = execTransfCmd("/nocmd", reflect.ValueOf("ciao ciao"))
+	ret, err = execTransfCmd("/nocmd %v", reflect.ValueOf("ciao ciao"))
 	if err == nil {
-		t.Error(fmt.Errorf("an error was expected"))
+		t.Error(fmt.Errorf("an error was expected (missing command)"))
+	}
+	ret, err = execTransfCmd("/bin/echo", reflect.ValueOf("ciao ciao"))
+	if err == nil {
+		t.Error(fmt.Errorf("an error was expected (missing arguments)"))
 	}
 	if ret.Interface().(string) != "ciao ciao" {
 		t.Error(fmt.Errorf("a different return value was expected"))
