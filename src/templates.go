@@ -248,19 +248,25 @@ func execTransfCmd(template string, value reflect.Value) (reflect.Value, error) 
 		}
 		strvalue = string(jsonval)
 	}
-	command := fmt.Sprintf(template, strvalue)
-	parts := strings.Fields(command)
+	parts := strings.Fields(template)
 	if len(parts) == 1 {
-		return value, fmt.Errorf("the command is missing arguments: %v", command)
+		return value, fmt.Errorf("the command is missing arguments: %v", template)
 	}
 	if !isValidTransfCmd[parts[0]] {
 		return value, fmt.Errorf("the following command is not valid: %v", parts[0])
 	}
 	args := parts[1:]
+	// search and replace the input argument value (%v)
+	for i := range args {
+		if args[i] == "%v" {
+			args[i] = strvalue
+			break
+		}
+	}
 	out, err := exec.Command(parts[0], args...).Output()
 	// #nosec
 	if err != nil {
-		return value, fmt.Errorf("unable to run the command: %v -- [%v]", command, err)
+		return value, fmt.Errorf("unable to run the command: %v -- [%v]", template, err)
 	}
 	return reflect.ValueOf(strings.Trim(string(out), "\n")), nil
 }

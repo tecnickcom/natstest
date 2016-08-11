@@ -3,24 +3,21 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestGetFieldValueArray(t *testing.T) {
 	val := getFieldValue("0.Response.array", testMap["@internal"])
-	result := fmt.Sprintf("%#v", val)
-	expected := "[]interface {}{map[string]interface {}{\"key1\":\"value2\", \"key2\":\"beta\"}, map[string]interface {}{\"key1\":\"value2\", \"key2\":\"value2 test string\"}}"
-	if result != expected {
-		t.Error(fmt.Errorf("Found different value than expected: %v", result))
+	if val.Interface().([]interface{})[1].(map[string]interface{})["key2"].(string) != "value2 test string" {
+		t.Error(fmt.Errorf("Found different value than expected 'value2 test string'"))
 	}
 }
 
 func TestGetFieldValueArrayTransf(t *testing.T) {
-	val := getFieldValue("0.Response.array>/bin/echo -n %s", testMap["@internal"])
-	result := fmt.Sprintf("%#v", val)
-	expected := "\"[{\\\"key1\\\":\\\"value2\\\",\\\"key2\\\":\\\"beta\\\"},{\\\"key1\\\":\\\"value2\\\",\\\"key2\\\":\\\"value2 test string\\\"}]\""
-	if result != expected {
-		t.Error(fmt.Errorf("Found different value than expected: %#v", result))
+	val := getFieldValue("0.Response.array>/bin/echo -n %v", testMap["@internal"])
+	if !strings.Contains(val.Interface().(string), "value2 test string") {
+		t.Error(fmt.Errorf("Found different value than expected: %#v", val))
 	}
 }
 
@@ -118,7 +115,7 @@ func TestPocessTemplatesErrors(t *testing.T) {
 }
 
 func TestExecCmdTemplate(t *testing.T) {
-	ret, err := execTransfCmd("/bin/echo -n %s", reflect.ValueOf("ciao \"'\\ ciao"))
+	ret, err := execTransfCmd("/bin/echo -n %v", reflect.ValueOf("ciao \"'\\ ciao"))
 	if err != nil {
 		t.Error(fmt.Errorf("an error was not expected: %v", err))
 	}
@@ -128,17 +125,11 @@ func TestExecCmdTemplate(t *testing.T) {
 }
 
 func TestExecCmdTemplateErr(t *testing.T) {
-	ret, err := execTransfCmd("/bin/echo %v", reflect.ValueOf(""))
+	ret, err := execTransfCmd("/bin/cat -l %v", reflect.ValueOf("no_file"))
 	if err == nil {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
-
-	ret, err = execTransfCmd("/bin/cat -l %s", reflect.ValueOf("dog"))
-	if err == nil {
-		t.Error(fmt.Errorf("an error was expected"))
-	}
-
-	ret, err = execTransfCmd("/missing_param", reflect.ValueOf("ciao ciao"))
+	ret, err = execTransfCmd("/nocmd", reflect.ValueOf("ciao ciao"))
 	if err == nil {
 		t.Error(fmt.Errorf("an error was expected"))
 	}
