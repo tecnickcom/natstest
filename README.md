@@ -166,9 +166,10 @@ For example, the following refers to the value of someField in the Response sect
 
 * **Tranformed Previous Value**  
 The Previous Values as described above can be transformed by an external command-line application using the syntax as in the following example:  
-*"fieldC" : "~pv:6.Response.anotherField>/bin/echo ­n %v"*  
+*"fieldC" : "~pv:6.Response.anotherField>/bin/echo -­n %v"*  
 In this example the command line application is “/bin/echo” and the previous value is passed as argument (”%v” placeholder).  
 The allowed external command-line applications are defined in the configuration file.
+If the argument is not a single value, then it will be passed as JSON string.
 
 ## Command-line API Examples
 
