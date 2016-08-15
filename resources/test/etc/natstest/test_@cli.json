@@ -26,7 +26,7 @@
 			"previousReturnedValue" : "~pv:0.Request.previousReturnedValue",
 			"array" : [
 				{
-					"key1" : "value2",
+					"key1" : "~xc:/bin/echo:value2",
 					"key2" : "beta"
 				},
 				{

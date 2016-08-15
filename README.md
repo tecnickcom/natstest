@@ -153,6 +153,13 @@ A regular expression is identified by the “~re:” prefix.
 For example, the following regular expression matches any integer number:  
 *"fieldA" : "~re:[0-­9]+"*
 
+* **External Comparison** (only for Response)  
+An external command-line tool used to compare the expected with the actual value is identified by the “~xc:” prefix, followed by the command (e.g. /bin/echo), a colon (:) and the string-encoded expected value.
+The external tool must accept two arguments, the first one is the expected value and the second one is the actual value.
+The actual value will be automatically JSON-encoded if it is not a simple string.  
+For example:  
+*"fieldA" : "~xc:/usr/bin/mycomparetool.sh:expected_value"*
+
 * **TimeStamp**  
 We can add the current UTC timestamp by using the “~ts:” prefix followed by the time format as defined in https://golang.org/pkg/time, or without format to get the Unix timestamp in seconds.  
 For example:  

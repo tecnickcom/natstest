@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"math"
+	"os/exec"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 // check if the messages are matching
@@ -98,11 +99,16 @@ func processCompareDefault(expected reflect.Value, actual reflect.Value) (err er
 	if expected.Kind() != reflect.String {
 		return getFormattedDiffError("values are different", expected, actual)
 	}
-	// check if the expected value is a regular expression
+	// extract string value
 	value := expected.Interface().(string)
-	if len(value) == 0 || value[0] != '~' || value[0:int(math.Min(float64(len(value)), float64(4)))] != "~re:" {
+	if len(value) < 5 || (value[0:4] != "~re:" && value[0:4] != "~xc:") {
 		// the value is not a regular expression
 		return getFormattedDiffError("values are different", expected, actual)
+	}
+	if value[0:4] == "~xc:" {
+		// use external comparison tool
+		parts := strings.SplitN(value[4:], ":", 2)
+		return processCompareExternal(parts[0], parts[1], actual)
 	}
 	// compare using a regular expression
 	sv := fmt.Sprintf("%v", actual.Interface())
@@ -112,6 +118,32 @@ func processCompareDefault(expected reflect.Value, actual reflect.Value) (err er
 	}
 	if !match {
 		return getFormattedDiffError("the regular expression do not match", expected, actual)
+	}
+	return nil
+}
+
+// processCompareExternal compare values using an external tool.
+// The external tool must accept two arguments, the first is the expected value and the second is the actual value.
+// If the actual value is not a simple string, then it is encoded in JSON.
+func processCompareExternal(tool string, expected string, actual reflect.Value) (err error) {
+	if !isValidTransfCmd[tool] {
+		return fmt.Errorf("the following command is not valid: %v", tool)
+	}
+	var actualstr string
+	if reflect.TypeOf(actual.Interface()).Kind() == reflect.String {
+		actualstr = actual.Interface().(string)
+	} else {
+		// encode the object as JSON string
+		jsonval, err := json.Marshal(actual.Interface())
+		if err != nil {
+			return fmt.Errorf("unable to json-encode the actual value: %#v -- [%v]", actual.Interface(), err)
+		}
+		actualstr = string(jsonval)
+	}
+	_, err = exec.Command(tool, expected, actualstr).Output()
+	// #nosec
+	if err != nil {
+		return fmt.Errorf("failed comparing the values usign the command: %v -- [%v]", tool, err)
 	}
 	return nil
 }

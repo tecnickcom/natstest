@@ -229,6 +229,34 @@ func TestCli(t *testing.T) {
 		testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
 		testEndPoint(t, "GET", "/test/all", "", 417)
 
+		// invalid comparison command
+		jsonerr = `[
+	{
+		"Topic" : "@.put.error.test",
+		"Request" : {
+			"value" : "ciao"
+		},
+		"Response" : {
+			"value" : "~xc:/invalid/:ciao"
+		}
+	}
+]`
+		testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
+
+		// comparison error
+		jsonerr = `[
+	{
+		"Topic" : "@.put.error.test",
+		"Request" : {
+			"value" : {"key":"ciao"}
+		},
+		"Response" : {
+			"value" : "~xc:/bin/cat:ciao"
+		}
+	}
+]`
+		testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
+
 		// try to connect to the wrong nats bus address
 		initNatsBus("nats://127.0.0.1:4333")
 		testEndPoint(t, "GET", "/status", "", 503)
