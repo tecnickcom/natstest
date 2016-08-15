@@ -154,7 +154,7 @@ For example, the following regular expression matches any integer number:
 *"fieldA" : "~re:[0-­9]+"*
 
 * **External Comparison** (only for Response)  
-An external command-line tool used to compare the expected with the actual value is identified by the “~xc:” prefix, followed by the command (e.g. /bin/echo), a colon (:) and the string-encoded expected value.
+An external command-line tool used to compare the expected with the actual value is identified by the “~xc:” prefix, followed by the command (e.g. /usr/bin/mycomparetool), a colon (:) and the string-encoded expected value.
 The external tool must accept two arguments, the first one is the expected value and the second one is the actual value.
 The actual value will be automatically JSON-encoded if it is not a simple string.  
 For example:  
