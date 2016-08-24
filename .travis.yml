@@ -13,6 +13,7 @@ branches:
 
 go:
   - 1.6
+  - 1.7
   - tip
 
 matrix:
@@ -33,5 +34,5 @@ script:
 after_failure:
   - cat ./target/test/report.xml
 
-after_script:
-  - if [ "$TRAVIS_GO_VERSION" = "1.6" ]; then $HOME/gopath/bin/goveralls -covermode=count -coverprofile=target/report/coverage.out -service=travis-ci; fi;
+after_success:
+  - if [ "$TRAVIS_GO_VERSION" = "1.7" ]; then $HOME/gopath/bin/goveralls -covermode=count -coverprofile=target/report/coverage.out -service=travis-ci; fi;

@@ -3,7 +3,7 @@
 # @author      Nicola Asuni <nicola.asuni@miracl.com>
 # @link        https://github.com/miracl/natstest
 #
-# This file is intended to be executed in a Linux-xompatible system.
+# This file is intended to be executed in a Linux-compatible system.
 # It also assumes that the project has been cloned in the right path under GOPATH:
 # $GOPATH/src/github.com/miracl/natstest
 #
