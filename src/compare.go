@@ -140,8 +140,8 @@ func processCompareExternal(tool string, expected string, actual reflect.Value) 
 		}
 		actualstr = string(jsonval)
 	}
+	/* #nosec */
 	_, err = exec.Command(tool, expected, actualstr).Output()
-	// #nosec
 	if err != nil {
 		return fmt.Errorf("failed comparing the values using the command: %v -- [%v]", tool, err)
 	}

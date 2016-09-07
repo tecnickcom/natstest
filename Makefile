@@ -171,22 +171,22 @@ coverage:
 # Report cyclomatic complexity
 cyclo:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) gocyclo -avg ./src | tee target/report/cyclo.txt
+	GOPATH=$(GOPATH) gocyclo -avg ./src | tee target/report/cyclo.txt ; test $${PIPESTATUS[0]} -eq 0
 
 # Detect ineffectual assignments
 ineffassign:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) ineffassign ./src | tee target/report/ineffassign.txt
+	GOPATH=$(GOPATH) ineffassign ./src | tee target/report/ineffassign.txt ; test $${PIPESTATUS[0]} -eq 0
 
 # Detect commonly misspelled words in source files
 misspell:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) misspell -error ./src  | tee target/report/misspell.txt
+	GOPATH=$(GOPATH) misspell -error ./src | tee target/report/misspell.txt ; test $${PIPESTATUS[0]} -eq 0
 
 # AST scanner
 astscan:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) gas --nosec=true ./... | tee target/report/astscan.txt
+	GOPATH=$(GOPATH) gas ./... | tee target/report/astscan.txt ; test $${PIPESTATUS[0]} -eq 0
 
 # Generate source docs
 docs:

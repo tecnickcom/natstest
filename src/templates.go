@@ -38,6 +38,9 @@ func replaceTemplates(obj interface{}) (interface{}, error) {
 	processTemplates(copy, original)
 	// encode the copy interface as json
 	jsoncopy, err := json.Marshal(copy.Interface())
+	if err != nil {
+		return nil, fmt.Errorf("Unable to encode to JSON")
+	}
 
 	// unescape marked json strings
 	search := regexp.MustCompile("(?U)\"" + jsonStartMark + ".*" + jsonEndMark + "\"")
@@ -263,8 +266,8 @@ func execTransfCmd(template string, value reflect.Value) (reflect.Value, error) 
 			break
 		}
 	}
+	/* #nosec */
 	out, err := exec.Command(parts[0], args...).Output()
-	// #nosec
 	if err != nil {
 		return value, fmt.Errorf("unable to run the command: %v -- [%v]", template, err)
 	}
