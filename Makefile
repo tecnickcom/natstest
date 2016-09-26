@@ -202,7 +202,7 @@ qa: fmtcheck test vet lint coverage cyclo ineffassign misspell astscan
 
 # Get the dependencies
 deps:
-	GOPATH=$(GOPATH) go get ./...
+	GOPATH=$(GOPATH) go get -v ./...
 	GOPATH=$(GOPATH) go get github.com/golang/lint/golint
 	GOPATH=$(GOPATH) go get github.com/jstemmer/go-junit-report
 	GOPATH=$(GOPATH) go get github.com/axw/gocov/gocov
