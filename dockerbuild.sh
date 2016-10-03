@@ -15,10 +15,10 @@
 # ./dockerbuild.sh
 
 # build the environment
-docker build -t miracl/godev ./resources/DockerDev/
+docker build -t miracl/natstestdev ./resources/DockerDev/
 
 # project root path
-PRJPATH=/root/src/milagro-crypto-c
+PRJPATH=/root/src/github.com/miracl/natstest
 
 # generate a docker file on the fly
 cat > Dockerfile <<- EOM
