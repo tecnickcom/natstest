@@ -29,42 +29,70 @@ The test sequences are defined using the JSON format and can be either stored as
 
 ![Main Schema](doc/images/natstest_schema.png)
 
-## Getting started (for developers)
 
-This application is written in GO language, please refer to the guides in https://golang.org for getting started.
+## Quick Start
 
-This project should be cloned in the following directory:
-```
-$GOPATH/src/github.com/miracl/natstest
-```
+This project includes a Makefile that allows you to test and build the project in a Linux-compatible system with simple commands.  
+All the artifacts and reports produced using this Makefile are stored in the *target* folder.  
 
-This project include a Makefile that allows you to test and build the project with simple commands.
+All the packages listed in the *resources/DockerDev/Dockerfile* file are required in order to build and test all the library options in the current environment. Alternatively, everything can be built inside a [Docker](https://www.docker.com) container using the command "make dbuild".
+
 To see all available options:
+
+    make help
+
+To build the project inside a Docker container (requires Docker):
+
+    make dbuild
+
+The base Docker building environment is defined in the following Dockerfile:
+
+    resources/DockerDev/Dockerfile
+
+To execute all the default test builds and generate reports in the current environment:
+
+    make qa
+
+To format the code (please use this command before submitting any pull request):
+
+    make format
+
+
+## Useful Docker commands
+
+To manually create the container you can execute:
 ```
-make help
+docker build --tag="miracl/natstestdev" .
 ```
 
-To build the project
+To log into the newly created container:
 ```
-make build
-```
-
-
-Alternatively this project can be built inside a Docker container using the command:
-```
-make dbuild
+docker run -t -i miracl/natstestdev /bin/bash
 ```
 
-## Running all tests
-
-Before committing the code, please check if it passes all tests using
+To get the container ID:
 ```
-make qa
+CONTAINER_ID=`docker ps -a | grep miracl/natstestdev | cut -c1-12`
 ```
 
-Please check all the available options using
+To delete the newly created docker container:
 ```
-make help
+docker rm -f $CONTAINER_ID
+```
+
+To delete the docker image:
+```
+docker rmi -f miracl/natstestdev
+```
+
+To delete all containers
+```
+docker rm $(docker ps -a -q)
+```
+
+To delete all images
+```
+    docker rmi $(docker images -q)
 ```
 
 
