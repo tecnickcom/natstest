@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------------
 
 # List special make targets that are not associated with files
-.PHONY: help all test format fmtcheck vet lint coverage cyclo ineffassign misspell astscan qa deps install uninstall clean nuke build rpm deb bz2 docker dockertest dbuild
+.PHONY: help all test format fmtcheck vet lint coverage cyclo ineffassign misspell astscan qa deps install uninstall clean nuke build rpm deb bz2 docker dockertest buildall dbuild
 
 # Use bash as shell (Note: Ubuntu now uses dash which doesn't support PIPESTATUS).
 SHELL=/bin/bash
@@ -128,6 +128,7 @@ help:
 	@echo "    make docker      : Build a docker container to run this service"
 	@echo "    make dockertest  : Test the newly built docker container"
 	@echo ""
+	@echo "    make buildall    : full build and test sequence"
 	@echo "    make dbuild      : build everything inside a Docker container"
 	@echo ""
 
@@ -394,7 +395,12 @@ dockertest:
 	docker rm `cat target/nats_docker_container.id` 2> /dev/null || true
 	@exit `grep -ic "false" target/project_docker_container.run`
 
+# full build and test sequence
+buildall: build qa rpm deb
+
 # build everything inside a Docker container
 dbuild:
 	@mkdir -p target
+	@echo 0 > target/buildall.exit
 	./dockerbuild.sh
+	@exit `cat target/buildall.exit`
