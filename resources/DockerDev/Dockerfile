@@ -1,45 +1,11 @@
 # Dockerfile
 #
-# Ubuntu 16.04 (Xenial) with development packages for GO language
+# Linux development environment
 #
-# @author Nicola Asuni <nicola.asuni@miracl.com>
+# @author      Nicola Asuni <nicola.asuni@miracl.com>
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
-# NOTES:
-#
-# This script requires Docker (https://www.docker.com/)
-#
-#     sudo apt-get install docker docker.io
-#
-# Add your user to the "docker" group:
-#     sudo groupadd docker
-#     sudo gpasswd -a <YOURUSER> docker
-#     sudo service docker restart
-#
-# To create the container execute:
-#     docker build --tag="miracl/godev:natstest" .
-#
-# To log into the newly created container:
-#     docker run -t -i miracl/godev /bin/bash
-#
-# To get the container ID:
-#     CONTAINER_ID=`docker ps -a | grep miracl/godev | cut -c1-12`
-#
-# To delete the newly created docker container:
-#     docker rm -f $CONTAINER_ID
-#
-# To delete the docker image:
-#     docker rmi -f miracl/godev
-#
-# To delete all containers
-#     docker rm $(docker ps -a -q)
-#
-# To delete all images
-#     docker rmi $(docker images -q)
-# ------------------------------------------------------------------------------
-
-FROM ubuntu:xenial
+FROM phusion/baseimage
 MAINTAINER nicola.asuni@miracl.com
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -47,21 +13,71 @@ ENV TERM linux
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 ENV HOME /root
 ENV DISPLAY :0
-ENV GOPATH=/root/GO
-ENV PATH=$GOPATH/bin:$PATH
+ENV GOPATH=/root
+ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
 
 # add repositories and update
-RUN apt-get update && apt-get -y dist-upgrade && \
-    apt-get install -y apt-utils software-properties-common python-software-properties && \
-    apt-add-repository multiverse && \
-    apt-get update
+RUN apt-get update && \
+apt-get -y dist-upgrade && \
+apt-get install -y apt-utils software-properties-common python-software-properties && \
+apt-add-repository universe && \
+apt-add-repository multiverse && \
+apt-get update
 
 # install development packages and debugging tools
-RUN apt-get install -y wget nano vim curl rsync git screen python build-essential autotools-dev autoconf make cmake gcc g++ libboost-all-dev golang golang-golang-x-tools alien rpm dh-make dh-golang debhelper devscripts pbuilder strace lsof gdb valgrind pkg-config openssh-server openssh-client upx-ucl
+RUN apt-get install -y \
+alien \
+astyle \
+autoconf \
+autotools-dev \
+build-essential \
+cmake \
+curl \
+debhelper \
+devscripts \
+dh-golang \
+dh-make \
+doxygen \
+doxygen-latex \
+flawfinder \
+g++ \
+gcc \
+gdb \
+git \
+golang \
+golang-golang-x-tools \
+lcov \
+libc6 \
+libc6-dev \
+libffi-dev \
+lsof \
+make \
+nano \
+parallel \
+pbuilder \
+pkg-config \
+python \
+python-dev \
+python-pip \
+rpm \
+rsync \
+screen \
+strace \
+swig \
+valgrind \
+vim \
+wget
 
-# configure GO
-RUN mkdir -p /root/GO/bin && \
-    mkdir -p /root/GO/pkg && \
-    mkdir -p /root/GO/src && \
-    echo 'export GOPATH=/root/GO' >> /root/.profile && \
-    echo 'export PATH=$GOPATH/bin:$PATH' >> /root/.profile
+# Configure SSH
+RUN mkdir -p /root/.ssh && echo "Host github.com\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
+
+# Install and configure GO
+RUN wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz && \
+tar xvf go1.7.1.linux-amd64.tar.gz && \
+mv go /usr/local && \
+mkdir -p /root/bin && \
+mkdir -p /root/pkg && \
+mkdir -p /root/src && \
+echo 'export GOPATH=/root' >> /root/.profile && \
+echo 'export PATH=/usr/local/go/bin:$GOPATH/bin:$PATH' >> /root/.profile && \
+go version

@@ -17,16 +17,19 @@
 # build the environment
 docker build -t miracl/godev ./resources/DockerDev/
 
+# project root path
+PRJPATH=/root/src/milagro-crypto-c
+
 # generate a docker file on the fly
 cat > Dockerfile <<- EOM
-FROM miracl/godev
+FROM miracl/amcldev
 MAINTAINER nicola.asuni@miracl.com
-RUN mkdir -p /root/.ssh
-RUN echo "Host github.com\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
-RUN mkdir -p /root/GO/src/github.com/miracl/natstest
-ADD ./ /root/GO/src/github.com/miracl/natstest
-WORKDIR /root/GO/src/github.com/miracl/natstest
-RUN make deps && make qa && make build
+RUN mkdir -p ${PRJPATH}
+ADD ./ ${PRJPATH}
+WORKDIR ${PRJPATH}
+RUN make deps && \
+make qa && \
+make build
 EOM
 
 # docker image name
@@ -39,7 +42,7 @@ docker build --no-cache -t ${DOCKER_IMAGE_NAME} .
 CONTAINER_ID=$(docker run -d ${DOCKER_IMAGE_NAME})
 
 # copy the artifact back to the host
-docker cp ${CONTAINER_ID}:"/root/GO/src/github.com/miracl/natstest/target" ./
+docker cp ${CONTAINER_ID}:"${PRJPATH}/target" ./
 
 # remove the container and image
 docker rm -f ${CONTAINER_ID} || true
