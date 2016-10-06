@@ -38,25 +38,29 @@ All the artifacts and reports produced using this Makefile are stored in the *ta
 All the packages listed in the *resources/DockerDev/Dockerfile* file are required in order to build and test all the library options in the current environment. Alternatively, everything can be built inside a [Docker](https://www.docker.com) container using the command "make dbuild".
 
 To see all available options:
-
-    make help
+```
+make help
+```
 
 To build the project inside a Docker container (requires Docker):
-
-    make dbuild
+```
+make dbuild
+```
 
 The base Docker building environment is defined in the following Dockerfile:
-
-    resources/DockerDev/Dockerfile
+```
+resources/DockerDev/Dockerfile
+```
 
 To execute all the default test builds and generate reports in the current environment:
-
-    make qa
+```
+make qa
+```
 
 To format the code (please use this command before submitting any pull request):
-
-    make format
-
+```
+make format
+```
 
 ## Useful Docker commands
 
@@ -92,7 +96,7 @@ docker rm $(docker ps -a -q)
 
 To delete all images
 ```
-    docker rmi $(docker images -q)
+docker rmi $(docker images -q)
 ```
 
 
@@ -210,25 +214,25 @@ If the argument is not a single value, then it will be passed as JSON string.
 
 ```
 $ curl -X GET http://127.0.0.1:8080/
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.117601506Z","status":"success","code":200,"message":"OK","data":{"busy":false,"duration":40.08854651,"routes":[{"method":"GET","path":"/status","description":"check this service status"},{"method":"GET","path":"/test/:name","description":"execute the specified test"},{"method":"GET","path":"/reload","description":"reset and reload the test configuration files"},{"method":"PUT","path":"/new/:name","description":"load and execute the specified test configuration"},{"method":"DELETE","path":"/delete/:name","description":"remove the specified test configuration"}],"tests":["@cli","@example","@internal"]}}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":{"busy":false,"duration":40.08854651,"routes":[{"method":"GET","path":"/status","description":"check this service status"},{"method":"GET","path":"/test/:name","description":"execute the specified test"},{"method":"GET","path":"/reload","description":"reset and reload the test configuration files"},{"method":"PUT","path":"/new/:name","description":"load and execute the specified test configuration"},{"method":"DELETE","path":"/delete/:name","description":"remove the specified test configuration"}],"tests":["@cli","@example","@internal"]}}
 
 $ curl -X GET http://127.0.0.1:8080/status
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.25949742Z","status":"success","code":200,"message":"OK","data":{"busy":false,"duration":40.230439379,"nats":true,"message":"The service is healthy"}}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":{"busy":false,"duration":40.230439379,"nats":true,"message":"The service is healthy"}}
 
 $ curl -X GET http://127.0.0.1:8080/test/@internal
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.312769389Z","status":"success","code":200,"message":"OK","data":{"tests":1,"duration":0.00665151,"message":"All tests completed successfully"}}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":{"tests":1,"duration":0.00665151,"message":"All tests completed successfully"}}
 
 $ curl -H "Content-Type: application/json" -X PUT -d '[{"Topic":"@ab.cd","Request":{"a":"b"},"Response":{"a":"b"}}]' http://127.0.0.1:8080/new/@abcd
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.461460519Z","status":"success","code":200,"message":"OK","data":{"tests":1,"duration":0.00424797,"message":"All tests completed successfully"}}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":{"tests":1,"duration":0.00424797,"message":"All tests completed successfully"}}
 
 $ curl -X GET http://127.0.0.1:8080/test/all
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.51575876Z","status":"success","code":200,"message":"OK","data":{"tests":0,"duration":1.8450000000000001e-06,"message":"All tests completed successfully"}}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":{"tests":0,"duration":1.8450000000000001e-06,"message":"All tests completed successfully"}}
 
 $ curl -X DELETE http://127.0.0.1:8080/delete/@abcd
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.647561717Z","status":"success","code":200,"message":"OK","data":"the test @abcd has been successfully removed"}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":"the test @abcd has been successfully removed"}
 
 $ curl -X GET http://127.0.0.1:8080/reload
-{"service":"natstest","version":"2.7.2-45","time":"2016-06-15T13:58:28.696078646Z","status":"success","code":200,"message":"OK","data":"the test configuration files were successfully reloaded"}
+{"program":"natstest","version":"4.7.1","release":"1","datetime":"2016-10-06T15:00:39Z","timestamp":1475766039290853316,"status":"success","code":200,"message":"OK","data":"the test configuration files were successfully reloaded"}
 ```
 
 ## Testing approach
@@ -258,7 +262,8 @@ This service logs the log messages in JSON format.
 For example:
 
 ```
-{"level":"info","msg":"opening NATS bus connection","nats":["nats://127.0.0.1:4222"],"program":"natstest","release":"0","time":"2016-08-01T12:21:03+01:00","timestamp":1470050463199450658,"version":"0.0.0"}
+{"URI":"/new/@alpha","code":200,"datetime":"2016-10-06T15:00:39Z","hostname":"myserver","level":"info","msg":"request","program":"natstest","release":"1","timestamp":1475766039290853316,"type":"PUT","version":"4.7.1"}
+
 ```
 
 ## Developer(s) Contact
