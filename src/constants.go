@@ -1,18 +1,15 @@
 package main
 
-// ServiceName contains this program name
-const ServiceName = "natstest"
+// ProgramName contains this program name
+const ProgramName = "natstest"
 
-// ServiceID contains this program ID
-const ServiceID = "natstest"
-
-// ServiceVersion contains this program version
+// ProgramVersion contains this program version
 // This is automatically populated by the Makefile using the value from the VERSION file
-var ServiceVersion = "0.0.0"
+var ProgramVersion = "0.0.0"
 
-// ServiceRelease contains this program release number (or build number)
+// ProgramRelease contains this program release number (or build number)
 // This is automatically populated by the Makefile using the value from the RELEASE file
-var ServiceRelease = "0"
+var ProgramRelease = "0"
 
 // ServerAddress is the HTTP API URL (ip:port) or just (:port)
 const ServerAddress = ":8081"
@@ -25,11 +22,11 @@ const BusTimeout = 1
 
 // ConfigPath list the local paths where to look for configuration files (in order)
 var ConfigPath = [...]string{
-	"../resources/test/etc/" + ServiceName + "/",
+	"../resources/test/etc/" + ProgramName + "/",
 	"./",
 	"config/",
-	"$HOME/." + ServiceName + "/",
-	"/etc/" + ServiceName + "/",
+	"$HOME/." + ProgramName + "/",
+	"/etc/" + ProgramName + "/",
 }
 
 // LogLevel defines the default log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
