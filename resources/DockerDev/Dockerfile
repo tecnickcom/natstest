@@ -64,6 +64,7 @@ rsync \
 screen \
 strace \
 swig \
+upx-ucl \
 valgrind \
 vim \
 wget

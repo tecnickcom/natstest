@@ -8,24 +8,29 @@
 # ------------------------------------------------------------------------------
 
 # NOTES:
-#
 # This script requires Docker
 
 # EXAMPLE USAGE:
-# ./dockerbuild.sh
+# VENDOR=vendorname PROJECT=projectname ./dockerbuild.sh
+
+# Get vendor and project name
+: ${VENDOR:=vendor}
+: ${PROJECT:=project}
+
+# Name of the base development Docker image
+DOCKERDEV=${VENDOR}/dev_${PROJECT}
 
 # Build the base environment and keep it cached locally
-docker build -t miracl/natstestdev ./resources/DockerDev/
+docker build -t ${DOCKERDEV} ./resources/DockerDev/
 
 # Define the project root path
-PRJPATH=/root/src/github.com/miracl/natstest
+PRJPATH=/root/src/${PROJECT}
 
 # Generate a temporary Dockerfile to build and test the project
 # NOTE: The exit status of the RUN command is stored to be returned later,
 #       so in case of error we can continue without interrupting this script.
 cat > Dockerfile <<- EOM
-FROM miracl/natstestdev
-MAINTAINER nicola.asuni@miracl.com
+FROM ${DOCKERDEV}
 RUN mkdir -p ${PRJPATH}
 ADD ./ ${PRJPATH}
 WORKDIR ${PRJPATH}
@@ -33,7 +38,7 @@ RUN make buildall || (echo \$? > target/buildall.exit)
 EOM
 
 # Define the temporary Docker image name
-DOCKER_IMAGE_NAME="localbuild/natstest"
+DOCKER_IMAGE_NAME=${VENDOR}/build_${PROJECT}
 
 # Build the Docker image
 docker build --no-cache -t ${DOCKER_IMAGE_NAME} .

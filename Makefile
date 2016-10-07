@@ -33,8 +33,20 @@ RELEASE=$(shell cat RELEASE)
 # Name of RPM or DEB package
 PKGNAME=${OWNER}-${PROJECT}
 
-# Go lang path
-GOPATH=$(shell readlink -f $(shell pwd)/../../../../)
+# Current directory
+CURRENTDIR=$(shell pwd)
+
+# GO lang path
+ifneq ($(GOPATH),)
+	ifeq ($(findstring $(GOPATH),$(CURRENTDIR)),)
+		# the defined GOPATH is not valid
+		GOPATH=
+	endif
+endif
+ifeq ($(GOPATH),)
+	# extract the GOPATH
+	GOPATH=$(firstword $(subst /src/, ,$(CURRENTDIR)))
+endif
 
 # Add the GO binary dir in the PATH
 export PATH := ${GOPATH}/bin:$(PATH)
@@ -69,9 +81,6 @@ PATHINSTDOC=$(DESTDIR)/$(DOCPATH)
 # Installation path for man pages
 PATHINSTMAN=$(DESTDIR)/$(MANPATH)
 
-# Current directory
-CURRENTDIR=$(shell pwd)
-
 # RPM Packaging path (where RPMs will be stored)
 PATHRPMPKG=$(CURRENTDIR)/target/RPM
 
@@ -99,6 +108,7 @@ NATS_DOCKER_IMAGE_NAME=nats_$(OWNER)_$(PROJECT)$(DOCKERSUFFIX)
 help:
 	@echo ""
 	@echo "$(PROJECT) Makefile."
+	@echo "GOPATH=$(GOPATH)"
 	@echo "The following commands are available:"
 	@echo ""
 	@echo "    make qa          : Run all the tests"
@@ -402,5 +412,5 @@ buildall: build qa rpm deb
 dbuild:
 	@mkdir -p target
 	@echo 0 > target/buildall.exit
-	./dockerbuild.sh
+	VENDOR=$(VENDOR) PROJECT=$(PROJECT) ./dockerbuild.sh
 	@exit `cat target/buildall.exit`
