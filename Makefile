@@ -24,6 +24,9 @@ OWNER=MIRACL
 # Project vendor
 VENDOR=miracl
 
+# Project name
+PROJECT=natstest
+
 # Project version
 VERSION=$(shell cat VERSION)
 
@@ -303,7 +306,7 @@ rpm:
 	rpmbuild \
 	--define "_topdir $(PATHRPMPKG)" \
 	--define "_vendor $(VENDOR)" \
-	--define "_owner $(VENDOR)" \
+	--define "_owner $(OWNER)" \
 	--define "_project $(PROJECT)" \
 	--define "_package $(PKGNAME)" \
 	--define "_version $(VERSION)" \
