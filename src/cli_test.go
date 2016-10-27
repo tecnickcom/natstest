@@ -22,7 +22,7 @@ var emptyParamCases = []string{
 
 func TestCliEmptyParamError(t *testing.T) {
 	for _, param := range emptyParamCases {
-		os.Args = []string{"natstest", param}
+		os.Args = []string{ProgramName, param}
 		cmd, err := cli()
 		if err != nil {
 			t.Error(fmt.Errorf("An error wasn't expected: %v", err))
@@ -45,7 +45,7 @@ func TestCliEmptyParamError(t *testing.T) {
 }
 
 func TestCliNoConfigError(t *testing.T) {
-	os.Args = []string{"natstest", "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:3334", "--logLevel=DEBUG"}
+	os.Args = []string{ProgramName, "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:3334", "--logLevel=DEBUG"}
 	cmd, err := cli()
 	if err != nil {
 		t.Error(fmt.Errorf("An error wasn't expected: %v", err))
@@ -80,7 +80,7 @@ func TestCliNoConfigError(t *testing.T) {
 }
 
 func TestCli(t *testing.T) {
-	os.Args = []string{"natstest", "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:4222", "--logLevel=DEBUG"}
+	os.Args = []string{ProgramName, "--serverAddress=:8123", "--natsAddress=nats://127.0.0.1:4222", "--logLevel=DEBUG"}
 	cmd, err := cli()
 	if err != nil {
 		t.Error(fmt.Errorf("An error wasn't expected: %v", err))
@@ -97,7 +97,9 @@ func TestCli(t *testing.T) {
 
 	// use two separate channels for server and client testing
 	var wg sync.WaitGroup
-	wg.Add(2)
+
+	// SERVER
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
@@ -119,11 +121,15 @@ func TestCli(t *testing.T) {
 			t.Error(fmt.Errorf("An error was not expected: %v", err))
 		}
 	}()
+
+	// wait for the http server connection to start
+	time.Sleep(1000 * time.Millisecond)
+
+	// CLIENT
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
-
-		// wait for the http server and NATS connection to start
-		time.Sleep(2000 * time.Millisecond)
+		defer wg.Done() // End the server process
 
 		// test index
 		testEndPoint(t, "GET", "/", "", 200)
@@ -276,10 +282,8 @@ func TestCli(t *testing.T) {
 			testMap = oldTestMap
 		}()
 		testEndPoint(t, "GET", "/reload", "", 500)
-
-		// close the server goroutine
-		wg.Done()
 	}()
+
 	wg.Wait()
 }
 

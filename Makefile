@@ -15,14 +15,14 @@
 # Use bash as shell (Note: Ubuntu now uses dash which doesn't support PIPESTATUS).
 SHELL=/bin/bash
 
+# CVS path (path to the parent dir containing the project)
+CVSPATH=stash.certivox.com/scm/maas
+
 # Project owner
-OWNER=miracl
+OWNER=MIRACL
 
 # Project vendor
-VENDOR=${OWNER}
-
-# Project name
-PROJECT=natstest
+VENDOR=miracl
 
 # Project version
 VERSION=$(shell cat VERSION)
@@ -177,6 +177,7 @@ lint:
 
 # Generate the coverage report
 coverage:
+	@mkdir -p target/report
 	GOPATH=$(GOPATH) go tool cover -html=target/report/coverage.out -o target/report/coverage.html
 
 # Report cyclomatic complexity
@@ -203,8 +204,8 @@ astscan:
 docs:
 	@mkdir -p target/docs
 	nohup sh -c 'GOPATH=$(GOPATH) godoc -http=127.0.0.1:6060' > target/godoc_server.log 2>&1 &
-	wget --directory-prefix=target/docs/ --execute robots=off --retry-connrefused --recursive --no-parent --adjust-extension --page-requisites --convert-links http://127.0.0.1:6060/pkg/github.com/${OWNER}/${PROJECT}/ ; kill -9 `lsof -ti :6060`
-	@echo '<html><head><meta http-equiv="refresh" content="0;./127.0.0.1:6060/pkg/github.com/'${OWNER}'/'${PROJECT}'/index.html"/></head><a href="./127.0.0.1:6060/pkg/github.com/'${OWNER}'/'${PROJECT}'/index.html">'${PKGNAME}' Documentation ...</a></html>' > target/docs/index.html
+	wget --directory-prefix=target/docs/ --execute robots=off --retry-connrefused --recursive --no-parent --adjust-extension --page-requisites --convert-links http://127.0.0.1:6060/pkg/github.com/${VENDOR}/${PROJECT}/ ; kill -9 `lsof -ti :6060`
+	@echo '<html><head><meta http-equiv="refresh" content="0;./127.0.0.1:6060/pkg/'${CVSPATH}'/'${PROJECT}'/index.html"/></head><a href="./127.0.0.1:6060/pkg/'${CVSPATH}'/'${PROJECT}'/index.html">'${PKGNAME}' Documentation ...</a></html>' > target/docs/index.html
 
 # Alias to run targets: fmtcheck test vet lint coverage
 qa: fmtcheck test vet lint coverage cyclo ineffassign misspell astscan
@@ -405,13 +406,14 @@ dockertest:
 	docker rm `cat target/nats_docker_container.id` 2> /dev/null || true
 	@exit `grep -ic "false" target/project_docker_container.run`
 
-# full build and test sequence
+# Full build and test sequence
+# You may want to change this and remove the options you don't need
 buildall: build qa rpm deb
 
-# build everything inside a Docker container
+# Build everything inside a Docker container
 dbuild:
 	@mkdir -p target
 	@rm -rf target/*
 	@echo 0 > target/make.exit
-	VENDOR=$(VENDOR) PROJECT=$(PROJECT) MAKETARGET='$(MAKETARGET)' ./dockerbuild.sh
+	CVSPATH=$(CVSPATH) VENDOR=$(VENDOR) PROJECT=$(PROJECT) MAKETARGET='$(MAKETARGET)' ./dockerbuild.sh
 	@exit `cat target/make.exit`
