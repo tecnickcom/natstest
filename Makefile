@@ -31,7 +31,7 @@ VERSION=$(shell cat VERSION)
 RELEASE=$(shell cat RELEASE)
 
 # Name of RPM or DEB package
-PKGNAME=${OWNER}-${PROJECT}
+PKGNAME=${VENDOR}-${PROJECT}
 
 # Current directory
 CURRENTDIR=$(shell pwd)
@@ -97,10 +97,10 @@ PATHDOCKERPKG=$(CURRENTDIR)/target/DOCKER
 CCTARGETS=darwin/386 darwin/amd64 freebsd/386 freebsd/amd64 freebsd/arm linux/386 linux/amd64 linux/arm openbsd/386 openbsd/amd64 windows/386 windows/amd64
 
 # docker image name for consul (used during testing)
-CONSUL_DOCKER_IMAGE_NAME=consul_$(OWNER)_$(PROJECT)$(DOCKERSUFFIX)
+CONSUL_DOCKER_IMAGE_NAME=consul_$(VENDOR)_$(PROJECT)$(DOCKERSUFFIX)
 
 # docker image name for NATS (used during testing)
-NATS_DOCKER_IMAGE_NAME=nats_$(OWNER)_$(PROJECT)$(DOCKERSUFFIX)
+NATS_DOCKER_IMAGE_NAME=nats_$(VENDOR)_$(PROJECT)$(DOCKERSUFFIX)
 
 # --- MAKE TARGETS ---
 
@@ -303,7 +303,7 @@ rpm:
 	rpmbuild \
 	--define "_topdir $(PATHRPMPKG)" \
 	--define "_vendor $(VENDOR)" \
-	--define "_owner $(OWNER)" \
+	--define "_owner $(VENDOR)" \
 	--define "_project $(PROJECT)" \
 	--define "_package $(PKGNAME)" \
 	--define "_version $(VERSION)" \
@@ -366,7 +366,7 @@ docker: build
 	rm -rf $(PATHDOCKERPKG)
 	make install DESTDIR=$(PATHDOCKERPKG)
 	cp resources/DockerDeploy/Dockerfile $(PATHDOCKERPKG)/
-	docker build --no-cache --tag=$(OWNER)/$(PROJECT)$(DOCKERSUFFIX):latest $(PATHDOCKERPKG)
+	docker build --no-cache --tag=$(VENDOR)/$(PROJECT)$(DOCKERSUFFIX):latest $(PATHDOCKERPKG)
 
 # check if the deployment container starts
 dockertest:
@@ -374,7 +374,7 @@ dockertest:
 	rm -f target/old_docker_containers.id
 	docker ps -a | grep $(NATS_DOCKER_IMAGE_NAME) | awk '{print $$1}' >> target/old_docker_containers.id || true
 	docker ps -a | grep $(CONSUL_DOCKER_IMAGE_NAME) | awk '{print $$1}' >> target/old_docker_containers.id || true
-	docker ps -a | grep $(OWNER)/$(PROJECT)$(DOCKERSUFFIX) | awk '{print $$1}' >> target/old_docker_containers.id || true
+	docker ps -a | grep $(VENDOR)/$(PROJECT)$(DOCKERSUFFIX) | awk '{print $$1}' >> target/old_docker_containers.id || true
 	docker stop `cat target/old_docker_containers.id` 2> /dev/null || true
 	docker rm `cat target/old_docker_containers.id` 2> /dev/null || true
 	# start a NATS service inside a container
@@ -393,7 +393,7 @@ dockertest:
 	--env="NATSTEST_REMOTECONFIGENDPOINT=127.0.0.1:`cat target/consul_docker_container.port`" \
 	--env="NATSTEST_REMOTECONFIGPATH=/config/natstest" \
 	--env="NATSTEST_REMOTECONFIGSECRETKEYRING=" \
-	${OWNER}/${PROJECT}$(DOCKERSUFFIX):latest > target/project_docker_container.id || true
+	${VENDOR}/${PROJECT}$(DOCKERSUFFIX):latest > target/project_docker_container.id || true
 	sleep 5
 	# check if the container is working
 	docker inspect -f {{.State.Running}} `cat target/project_docker_container.id` > target/project_docker_container.run || true
