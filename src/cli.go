@@ -24,7 +24,7 @@ func cli() (*cobra.Command, error) {
 	appParams = &cfgParams
 	rootCmd := new(cobra.Command)
 	rootCmd.Flags().StringVarP(&configDir, "configDir", "c", "", "Configuration directory to be added on top of the search list")
-	rootCmd.Flags().StringVarP(&appParams.logLevel, "logLevel", "l", cfgParams.logLevel, "Log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG")
+	rootCmd.Flags().StringVarP(&appParams.log.Level, "logLevel", "l", cfgParams.log.Level, "Log level: EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG")
 	rootCmd.Flags().StringVarP(&appParams.serverAddress, "serverAddress", "s", cfgParams.serverAddress, "HTTP API URL (ip:port) or just (:port)")
 	rootCmd.Flags().StringVarP(&appParams.natsAddress, "natsAddress", "n", cfgParams.natsAddress, "NATS bus Address (nats://ip:port)")
 

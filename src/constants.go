@@ -11,15 +11,6 @@ var ProgramVersion = "0.0.0"
 // This is automatically populated by the Makefile using the value from the RELEASE file
 var ProgramRelease = "0"
 
-// ServerAddress is the HTTP API URL (ip:port) or just (:port)
-const ServerAddress = ":8081"
-
-// NatsAddress is the default NATS bus address
-const NatsAddress = "nats://127.0.0.1:4222"
-
-// BusTimeout is the default NATS bus connection timeout in seconds
-const BusTimeout = 1
-
 // ConfigPath list the local paths where to look for configuration files (in order)
 var ConfigPath = [...]string{
 	"../resources/test/etc/" + ProgramName + "/",
@@ -28,9 +19,6 @@ var ConfigPath = [...]string{
 	"$HOME/." + ProgramName + "/",
 	"/etc/" + ProgramName + "/",
 }
-
-// LogLevel defines the default log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
-const LogLevel = "INFO"
 
 // RemoteConfigProvider is the remote configuration source ("consul", "etcd")
 const RemoteConfigProvider = ""
@@ -43,6 +31,41 @@ const RemoteConfigPath = ""
 
 // RemoteConfigSecretKeyring is the path to the openpgp secret keyring used to decript the remote configuration data ("/etc/natstest/configkey.gpg")
 const RemoteConfigSecretKeyring = "" // #nosec
+
+// Log (syslog)
+
+// LogLevel defines the default log level: EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
+const LogLevel = "INFO"
+
+// LogNetwork is the network type used by Syslog (i.e. udp or tcp). Leave emty to disable.
+const LogNetwork = ""
+
+// LogAddress is the network address of the Syslog daemon (ip:port) or just (:port). Leave emty to disable.
+const LogAddress = ""
+
+// StatsD is used to collect usage metrics
+
+// StatsPrefix is the StatsD client's string prefix that will be used in every bucket name.
+const StatsPrefix = "srv-idp"
+
+// StatsNetwork is the network type used by the StatsD client (i.e. udp or tcp).
+const StatsNetwork = "udp"
+
+// StatsAddress is the network address of the StatsD daemon (ip:port) or just (:port)
+const StatsAddress = ":8125"
+
+// StatsFlushPeriod sets how often (in milliseconds) the StatsD client's buffer is flushed.
+// When 0 the buffer is only flushed when it is full.
+const StatsFlushPeriod = 100
+
+// ServerAddress is the HTTP API URL (ip:port) or just (:port)
+const ServerAddress = ":8081"
+
+// NatsAddress is the default NATS bus address
+const NatsAddress = "nats://127.0.0.1:4222"
+
+// BusTimeout is the default NATS bus connection timeout in seconds
+const BusTimeout = 1
 
 // ValidTransfCmd contains the default list of valid transformation commands to be used in test configuration templates
 var ValidTransfCmd = []string{

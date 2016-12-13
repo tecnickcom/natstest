@@ -389,7 +389,7 @@ dockertest:
 	docker inspect --format='{{(index (index .NetworkSettings.Ports "4222/tcp") 0).HostPort}}' `cat target/nats_docker_container.id` > target/nats_docker_container.port
 	docker inspect --format='{{(index (index .NetworkSettings.Ports "8500/tcp") 0).HostPort}}' `cat target/consul_docker_container.id` > target/consul_docker_container.port
 	# push Consul configuration
-	curl -X PUT -d '{"serverAddress":":9876","natsAddress":"nats://127.0.0.1:'`cat target/nats_docker_container.port`'","validTransfCmd":["/bin/cat","/bin/echo"]}' http://127.0.0.1:`cat target/consul_docker_container.port`/v1/kv/config/natstest
+	curl -X PUT -d '{"log": {"level": "DEBUG","network": "","address": ""},"stats": {"prefix": "natestest","network": "udp","address": ":8125","flush_period": 100},"serverAddress" : ":8081","natsAddress" : "nats://127.0.0.1:4222","validTransfCmd" : ["/bin/cat","/bin/echo"]}' http://127.0.0.1:`cat target/consul_docker_container.port`/v1/kv/config/natstest
 	# Start natstest container
 	docker run --detach=true --net="host" --tty=true \
 	--env="NATSTEST_REMOTECONFIGPROVIDER=consul" \

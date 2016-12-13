@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
 )
@@ -23,10 +22,11 @@ func (rcfg remoteConfigParams) isEmpty() bool {
 
 // params struct contains the application parameters
 type params struct {
-	serverAddress  string   // HTTP API URL (ip:port) or just (:port)
-	natsAddress    string   // NATS bus Address (nats://ip:port)
-	validTransfCmd []string // list of valid transformation commands
-	logLevel       string   // Log level: NONE, EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
+	log            *LogData   // Log level: EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG.
+	stats          *StatsData // StatsD configuration, it is used to collect usage metrics
+	serverAddress  string     // HTTP API URL (ip:port) or just (:port)
+	natsAddress    string     // NATS bus Address (nats://ip:port)
+	validTransfCmd []string   // list of valid transformation commands
 }
 
 var configDir string
@@ -48,11 +48,21 @@ func getLocalConfigParams() (cfg params, rcfg remoteConfigParams) {
 	viper.SetDefault("remoteConfigEndpoint", RemoteConfigEndpoint)
 	viper.SetDefault("remoteConfigPath", RemoteConfigPath)
 	viper.SetDefault("remoteConfigSecretKeyring", RemoteConfigSecretKeyring)
+
 	// set default configuration values
+
+	viper.SetDefault("log.level", LogLevel)
+	viper.SetDefault("log.network", LogNetwork)
+	viper.SetDefault("log.address", LogAddress)
+
+	viper.SetDefault("stats.prefix", StatsPrefix)
+	viper.SetDefault("stats.network", StatsNetwork)
+	viper.SetDefault("stats.address", StatsAddress)
+	viper.SetDefault("stats.flush_period", StatsFlushPeriod)
+
 	viper.SetDefault("serverAddress", ServerAddress)
 	viper.SetDefault("natsAddress", NatsAddress)
 	viper.SetDefault("validTransfCmd", ValidTransfCmd)
-	viper.SetDefault("logLevel", LogLevel)
 
 	// name of the configuration file without extension
 	viper.SetConfigName("config")
@@ -73,12 +83,7 @@ func getLocalConfigParams() (cfg params, rcfg remoteConfigParams) {
 	viper.ReadInConfig()
 
 	// read configuration parameters
-	cfg = params{
-		serverAddress:  viper.GetString("serverAddress"),
-		natsAddress:    viper.GetString("natsAddress"),
-		validTransfCmd: viper.GetStringSlice("validTransfCmd"),
-		logLevel:       viper.GetString("logLevel"),
-	}
+	cfg = getViperParams()
 
 	// support environment variables for the remote configuration
 	viper.AutomaticEnv()
@@ -108,10 +113,19 @@ func getRemoteConfigParams(cfg params, rcfg remoteConfigParams) (params, error) 
 	viper.Reset()
 
 	// set default configuration values
+
+	viper.SetDefault("log.level", cfg.log.Level)
+	viper.SetDefault("log.network", cfg.log.Network)
+	viper.SetDefault("log.address", cfg.log.Address)
+
+	viper.SetDefault("stats.prefix", cfg.stats.Prefix)
+	viper.SetDefault("stats.network", cfg.stats.Network)
+	viper.SetDefault("stats.address", cfg.stats.Address)
+	viper.SetDefault("stats.flush_period", cfg.stats.FlushPeriod)
+
 	viper.SetDefault("serverAddress", cfg.serverAddress)
 	viper.SetDefault("natsAddress", cfg.natsAddress)
 	viper.SetDefault("validTransfCmd", cfg.validTransfCmd)
-	viper.SetDefault("logLevel", cfg.logLevel)
 
 	// configuration type
 	viper.SetConfigType("json")
@@ -132,30 +146,60 @@ func getRemoteConfigParams(cfg params, rcfg remoteConfigParams) (params, error) 
 	}
 
 	// read configuration parameters
+	return getViperParams(), nil
+}
+
+// getViperParams reads the config params via Viper
+func getViperParams() params {
 	return params{
-			serverAddress:  viper.GetString("serverAddress"),
-			natsAddress:    viper.GetString("natsAddress"),
-			validTransfCmd: viper.GetStringSlice("validTransfCmd"),
-			logLevel:       viper.GetString("logLevel"),
+
+		log: &LogData{
+			Level:   viper.GetString("log.level"),
+			Network: viper.GetString("log.network"),
+			Address: viper.GetString("log.address"),
 		},
-		nil
+
+		stats: &StatsData{
+			Prefix:      viper.GetString("stats.prefix"),
+			Network:     viper.GetString("stats.network"),
+			Address:     viper.GetString("stats.address"),
+			FlushPeriod: viper.GetInt("stats.flush_period"),
+		},
+
+		serverAddress:  viper.GetString("serverAddress"),
+		natsAddress:    viper.GetString("natsAddress"),
+		validTransfCmd: viper.GetStringSlice("validTransfCmd"),
+	}
 }
 
 // checkParams cheks if the configuration parameters are valid
-func checkParams(appParams *params) error {
-	if appParams.serverAddress == "" {
+func checkParams(prm *params) error {
+	// Log
+	if prm.log.Level == "" {
+		return errors.New("log Level is empty")
+	}
+	err := prm.log.setLog()
+	if err != nil {
+		return err
+	}
+
+	// StatsD
+	if prm.stats.Prefix == "" {
+		return errors.New("The stats Prefix is empty")
+	}
+	if prm.stats.Network != "udp" && prm.stats.Network != "tcp" {
+		return errors.New("The stats Network must be udp or tcp")
+	}
+	if prm.stats.FlushPeriod < 0 {
+		return errors.New("The stats FlushPeriod must be >= 0")
+	}
+
+	if prm.serverAddress == "" {
 		return errors.New("serverAddress is empty")
 	}
-	if appParams.natsAddress == "" {
+	if prm.natsAddress == "" {
 		return errors.New("natsAddress is empty")
 	}
-	if appParams.logLevel == "" {
-		return errors.New("logLevel is empty")
-	}
-	levelCode, err := log.ParseLevel(appParams.logLevel)
-	if err != nil {
-		return errors.New("The logLevel must be one of the following: panic, fatal, error, warning, info, debug")
-	}
-	log.SetLevel(levelCode)
+
 	return nil
 }

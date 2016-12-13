@@ -1,13 +1,23 @@
 {
-    "remoteConfigProvider" : "",
-    "remoteConfigEndpoint" : "",
-    "remoteConfigPath" : "",
-    "remoteConfigSecretKeyring" : "",
-    "serverAddress" : ":8081",
-    "natsAddress" : "nats://127.0.0.1:4222",
-    "validTransfCmd" : [
-        "/bin/cat",
-        "/bin/echo"
-    ],
-    "logLevel" : "debug"
+  "remoteConfigProvider" : "",
+  "remoteConfigEndpoint" : "",
+  "remoteConfigPath" : "",
+  "remoteConfigSecretKeyring" : "",
+  "log": {
+    "level": "DEBUG",
+    "network": "",
+    "address": ""
+  },
+  "stats": {
+    "prefix": "natstest",
+    "network": "udp",
+    "address": ":8125",
+    "flush_period": 100
+  },
+  "serverAddress" : ":8081",
+  "natsAddress" : "nats://127.0.0.1:4222",
+  "validTransfCmd" : [
+    "/bin/cat",
+    "/bin/echo"
+  ]
 }

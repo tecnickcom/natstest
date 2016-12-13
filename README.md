@@ -119,7 +119,7 @@ Available Commands:
 
 Flags:
   -c, --configDir     string  Configuration directory to be added on top of the search list
-  -l, --logLevel      string  Log level: panic, fatal, error, warning, info, debug
+  -l, --logLevel      string  Log level: EMERGENCY, ALERT, CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG
   -n, --natsAddress   string  NATS bus Address (nats://ip:port) (default "nats://127.0.0.1:4222")
   -s, --serverAddress string  HTTP API URL (ip:port) or just (:port) (default ":8081")
 
