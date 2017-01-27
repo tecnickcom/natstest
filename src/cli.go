@@ -41,13 +41,20 @@ func cli() (*cobra.Command, error) {
 		if err != nil {
 			return err
 		}
+
+		// initialize StatsD client (ignore errors)
+		initStats(appParams.stats)
+		defer stats.Close()
+
 		// load the test map from the test configuration files
 		err = loadTestMap()
 		if err != nil {
 			return err
 		}
+
 		// initialize the NATS bus
 		initNatsBus(appParams.natsAddress)
+
 		// start the http server
 		return startServer(appParams.serverAddress)
 	}

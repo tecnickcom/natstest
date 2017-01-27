@@ -58,6 +58,9 @@ const StatsAddress = ":8125"
 // When 0 the buffer is only flushed when it is full.
 const StatsFlushPeriod = 100
 
+// ServerNetwork is the network type used by the server (tcp)
+const ServerNetwork = "tcp"
+
 // ServerAddress is the HTTP API URL (ip:port) or just (:port)
 const ServerAddress = ":8081"
 

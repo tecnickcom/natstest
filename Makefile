@@ -389,7 +389,7 @@ dockertest:
 	docker inspect --format='{{(index (index .NetworkSettings.Ports "4222/tcp") 0).HostPort}}' `cat target/nats_docker_container.id` > target/nats_docker_container.port
 	docker inspect --format='{{(index (index .NetworkSettings.Ports "8500/tcp") 0).HostPort}}' `cat target/consul_docker_container.id` > target/consul_docker_container.port
 	# push Consul configuration
-	curl -X PUT -d '{"log": {"level": "DEBUG","network": "","address": ""},"stats": {"prefix": "natestest","network": "udp","address": ":8125","flush_period": 100},"serverAddress" : ":8081","natsAddress" : "nats://127.0.0.1:4222","validTransfCmd" : ["/bin/cat","/bin/echo"]}' http://127.0.0.1:`cat target/consul_docker_container.port`/v1/kv/config/natstest
+	curl --request PUT --data @resources/test/etc/natstest/config.json http://127.0.0.1:`cat target/consul_docker_container.port`/v1/kv/config/natstest
 	# Start natstest container
 	docker run --detach=true --net="host" --tty=true \
 	--env="NATSTEST_REMOTECONFIGPROVIDER=consul" \
@@ -402,6 +402,7 @@ dockertest:
 	docker inspect -f {{.State.Running}} `cat target/project_docker_container.id` > target/project_docker_container.run || true
 	# remove the testing container
 	docker stop `cat target/project_docker_container.id` 2> /dev/null || true
+	docker logs `cat target/project_docker_container.id` || true
 	docker rm `cat target/project_docker_container.id` 2> /dev/null || true
 	docker stop `cat target/consul_docker_container.id` 2> /dev/null || true
 	docker rm `cat target/consul_docker_container.id` 2> /dev/null || true

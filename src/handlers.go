@@ -19,7 +19,7 @@ func setBusy(val bool) {
 }
 
 // return a list of available routes
-func index(rw http.ResponseWriter, hr *http.Request, ps httprouter.Params) {
+func indexHandler(rw http.ResponseWriter, hr *http.Request, ps httprouter.Params) {
 	type info struct {
 		Busy     bool     `json:"busy"`     // true if a test is in progress
 		Duration float64  `json:"duration"` // elapsed time since last test start in seconds
@@ -35,7 +35,7 @@ func index(rw http.ResponseWriter, hr *http.Request, ps httprouter.Params) {
 }
 
 // returns the status of the service
-func status(rw http.ResponseWriter, hr *http.Request, ps httprouter.Params) {
+func statusHandler(rw http.ResponseWriter, hr *http.Request, ps httprouter.Params) {
 	if busy {
 		sendBusyResponse(rw, hr, ps)
 		return

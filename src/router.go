@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -10,8 +10,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// srvListener is the server network listener
+var serverListener net.Listener
+
 // start the HTTP server
-func startServer(address string) error {
+func startServer(address string) (err error) {
 	log.Info("setting http router")
 	router := httprouter.New()
 
@@ -27,7 +30,7 @@ func startServer(address string) error {
 	}
 
 	// index handler
-	router.GET("/", index)
+	router.GET("/", indexHandler)
 
 	// set end points and handlers
 	for _, route := range routes {
@@ -37,16 +40,32 @@ func startServer(address string) error {
 	log.WithFields(log.Fields{
 		"address": address,
 	}).Info("starting http server")
-	return fmt.Errorf("unable to start the HTTP server: %v", http.ListenAndServe(address, router))
+
+	serverListener, err = net.Listen(ServerNetwork, address)
+	if err != nil {
+		return fmt.Errorf("unable to open the server listening port: %v", err)
+	}
+	defer serverListener.Close()
+
+	return fmt.Errorf("unable to start the HTTP server: %v", http.Serve(serverListener, router))
+}
+
+// setHeaders set the default headers
+func setHeaders(hw http.ResponseWriter, contentType string, code int) {
+	hw.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	hw.Header().Set("Pragma", "no-cache")
+	hw.Header().Set("Expires", "0")
+	hw.Header().Set("Content-Type", contentType)
+	hw.WriteHeader(code)
+
+	// count HTTP status
+	stats.Increment(fmt.Sprintf("httpstatus.%d", code))
 }
 
 // send the HTTP response in JSON format
-func sendResponse(w http.ResponseWriter, r *http.Request, ps httprouter.Params, code int, data interface{}) {
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "0")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
+func sendResponse(hw http.ResponseWriter, hr *http.Request, ps httprouter.Params, code int, data interface{}) {
+
+	setHeaders(hw, "application/json", code)
 
 	nowTime := time.Now().UTC()
 
@@ -63,16 +82,28 @@ func sendResponse(w http.ResponseWriter, r *http.Request, ps httprouter.Params, 
 	}
 
 	// log request
-	log.WithFields(log.Fields{
-		"type": r.Method,
-		"URI":  r.RequestURI,
-		"code": code,
-	}).Info("request")
+	if code == 500 {
+		log.WithFields(log.Fields{
+			"type":  hr.Method,
+			"URI":   hr.RequestURI,
+			"query": hr.URL.Query(),
+			"code":  code,
+			"err":   data.(string),
+		}).Error("request")
+	} else {
+		log.WithFields(log.Fields{
+			"type":  hr.Method,
+			"URI":   hr.RequestURI,
+			"query": hr.URL.Query(),
+			"code":  code,
+		}).Info("request")
+	}
 
-	// send response as JSON
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	// send JSON response
+	err := sendJSONEncode(hw, response)
+	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
-		}).Error("unable to send the JSON response")
+		}).Error("unable to send JSON response")
 	}
 }

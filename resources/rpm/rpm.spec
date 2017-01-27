@@ -26,7 +26,7 @@ This program provides a RESTful HTTP JSON API service to test services connected
 It has been designed to test any system composed by services that exchange JSON messages via a NATS bus.
 
 %build
-(cd %{_current_directory} && make build)
+#(cd %{_current_directory} && make build)
 
 %install
 rm -rf $RPM_BUILD_ROOT
