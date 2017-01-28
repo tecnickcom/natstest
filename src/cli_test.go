@@ -9,7 +9,6 @@ import (
 	"os"
 	"reflect"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -17,8 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var endTestChannel chan bool
-var serverTestErrors uint64
+var stopServerChannel chan bool
 
 var wrongParamCases = []string{
 	"--serverAddress=",
@@ -121,17 +119,17 @@ func TestCli(t *testing.T) {
 		})
 	defer func() { routes = routes[:len(routes)-1] }()
 
-	endTestChannel = make(chan bool)
-	serverTestErrors = 0
-
 	// use two separate channels for server and client testing
 	var twg sync.WaitGroup
 	startTestServer(t, cmd, &twg)
-	startTestClient(t, &twg)
+	startTestClient(t)
 	twg.Wait()
 }
 
 func startTestServer(t *testing.T, cmd *cobra.Command, twg *sync.WaitGroup) {
+
+	stopServerChannel = make(chan bool)
+
 	twg.Add(1)
 	go func() {
 		defer twg.Done()
@@ -141,18 +139,22 @@ func startTestServer(t *testing.T, cmd *cobra.Command, twg *sync.WaitGroup) {
 			chp <- cmd.Execute()
 		}()
 
-		quit := false
+		stopped := false
 		for {
 			select {
-			case err := <-chp:
-				if !quit && err != nil {
-					atomic.AddUint64(&serverTestErrors, 1)
+			case err, ok := <-chp:
+				if ok && !stopped && err != nil {
+					stopServerChannel <- true
 					t.Error(fmt.Errorf("An error was not expected: %v", err))
 				}
 				return
-			case <-endTestChannel:
-				quit = true
-				stopServer() // this triggers the cmd.Execute error
+			case <-stopServerChannel:
+				stopped = true
+				if serverListener != nil {
+					serverListener.Close() // this triggers the cmd.Execute error
+				} else {
+					return
+				}
 			}
 		}
 	}()
@@ -161,47 +163,50 @@ func startTestServer(t *testing.T, cmd *cobra.Command, twg *sync.WaitGroup) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-func startTestClient(t *testing.T, twg *sync.WaitGroup) {
+func startTestClient(t *testing.T) {
 
-	if atomic.LoadUint64(&serverTestErrors) > 0 {
-		return
+	// check if the server is running
+	select {
+	case stop, ok := <-stopServerChannel:
+		if ok && stop {
+			return
+		}
+	default:
+		break
 	}
 
-	twg.Add(1)
-	go func() {
-		defer twg.Done()
-		defer func() { endTestChannel <- true }()
+	defer func() { stopServerChannel <- true }()
 
-		testEndPoint(t, "GET", "/", "", 200)
-		testEndPoint(t, "GET", "/status", "", 200)
+	testEndPoint(t, "GET", "/", "", 200)
+	testEndPoint(t, "GET", "/status", "", 200)
 
-		// error conditions
+	// error conditions
 
-		testEndPoint(t, "GET", "/INVALID", "", 404) // NotFound
-		testEndPoint(t, "PATCH", "/", "", 405)      // MethodNotAllowed
-		testEndPoint(t, "GET", "/panic", "", 500)   // PanicHandler
+	testEndPoint(t, "GET", "/INVALID", "", 404) // NotFound
+	testEndPoint(t, "PATCH", "/", "", 405)      // MethodNotAllowed
+	testEndPoint(t, "GET", "/panic", "", 500)   // PanicHandler
 
-		// test unknown test (wrong test name)
-		testEndPoint(t, "GET", "/test/MISSING", "", 404)
-		// test internal test config
-		testEndPoint(t, "GET", "/test/@cli", "", 200)
-		testEndPoint(t, "GET", "/test/one", "", 200)
-		// test all, including a faulty json config test
-		testEndPoint(t, "GET", "/test/all", "", 200)
+	// test unknown test (wrong test name)
+	testEndPoint(t, "GET", "/test/MISSING", "", 404)
+	// test internal test config
+	testEndPoint(t, "GET", "/test/@cli", "", 200)
+	testEndPoint(t, "GET", "/test/one", "", 200)
+	// test all, including a faulty json config test
+	testEndPoint(t, "GET", "/test/all", "", 200)
 
-		// test busy mode
-		setBusy(true)
-		defer setBusy(false)
-		testEndPoint(t, "GET", "/status", "", 409)
-		testEndPoint(t, "GET", "/test/@cli", "", 409)
-		testEndPoint(t, "GET", "/reload", "", 409)
-		testEndPoint(t, "DELETE", "/delete/@beta", "", 409)
-		setBusy(false)
+	// test busy mode
+	setBusy(true)
+	defer setBusy(false)
+	testEndPoint(t, "GET", "/status", "", 409)
+	testEndPoint(t, "GET", "/test/@cli", "", 409)
+	testEndPoint(t, "GET", "/reload", "", 409)
+	testEndPoint(t, "DELETE", "/delete/@beta", "", 409)
+	setBusy(false)
 
-		// test new test
-		testEndPoint(t, "PUT", "/new/alpha", "", 417)
+	// test new test
+	testEndPoint(t, "PUT", "/new/alpha", "", 417)
 
-		jsonraw := `[
+	jsonraw := `[
 	{
 		"Topic" : "@.put.test",
 		"Request" : {
@@ -244,26 +249,26 @@ func startTestClient(t *testing.T, twg *sync.WaitGroup) {
 		}
 	}
 ]`
-		testEndPoint(t, "PUT", "/new/@alpha", jsonraw, 200)
-		// test overwrite existing test
-		testEndPoint(t, "PUT", "/new/@alpha", jsonraw, 200)
-		// test new entry
-		testEndPoint(t, "GET", "/test/@alpha", "", 200)
+	testEndPoint(t, "PUT", "/new/@alpha", jsonraw, 200)
+	// test overwrite existing test
+	testEndPoint(t, "PUT", "/new/@alpha", jsonraw, 200)
+	// test new entry
+	testEndPoint(t, "GET", "/test/@alpha", "", 200)
 
-		// reset and reload test config files
-		testEndPoint(t, "GET", "/reload", "", 200)
+	// reset and reload test config files
+	testEndPoint(t, "GET", "/reload", "", 200)
 
-		// check the reload status
-		testEndPoint(t, "GET", "/test/@alpha", "", 404)
+	// check the reload status
+	testEndPoint(t, "GET", "/test/@alpha", "", 404)
 
-		// test add/delete
-		testEndPoint(t, "PUT", "/new/@beta", jsonraw, 200)
-		testEndPoint(t, "DELETE", "/delete/@beta", "", 200)
-		testEndPoint(t, "DELETE", "/delete/@beta", "", 404)
+	// test add/delete
+	testEndPoint(t, "PUT", "/new/@beta", jsonraw, 200)
+	testEndPoint(t, "DELETE", "/delete/@beta", "", 200)
+	testEndPoint(t, "DELETE", "/delete/@beta", "", 404)
 
-		// test "all" with an error file
-		// error config
-		jsonerr := `[
+	// test "all" with an error file
+	// error config
+	jsonerr := `[
 	{
 		"Topic" : "@.put.error.test",
 		"Request" : {
@@ -274,11 +279,11 @@ func startTestClient(t *testing.T, twg *sync.WaitGroup) {
 		}
 	}
 ]`
-		testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
-		testEndPoint(t, "GET", "/test/all", "", 417)
+	testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
+	testEndPoint(t, "GET", "/test/all", "", 417)
 
-		// invalid comparison command
-		jsonerr = `[
+	// invalid comparison command
+	jsonerr = `[
 	{
 		"Topic" : "@.put.error.test",
 		"Request" : {
@@ -289,10 +294,10 @@ func startTestClient(t *testing.T, twg *sync.WaitGroup) {
 		}
 	}
 ]`
-		testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
+	testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
 
-		// comparison error
-		jsonerr = `[
+	// comparison error
+	jsonerr = `[
 	{
 		"Topic" : "@.put.error.test",
 		"Request" : {
@@ -303,33 +308,25 @@ func startTestClient(t *testing.T, twg *sync.WaitGroup) {
 		}
 	}
 ]`
-		testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
+	testEndPoint(t, "PUT", "/new/error", jsonerr, 417)
 
-		// try to connect to the wrong nats bus address
-		initNatsBus("nats://127.0.0.1:4333")
-		testEndPoint(t, "GET", "/status", "", 503)
-		initNatsBus("nats://127.0.0.1:4222")
+	// try to connect to the wrong nats bus address
+	initNatsBus("nats://127.0.0.1:4333")
+	testEndPoint(t, "GET", "/status", "", 503)
+	initNatsBus("nats://127.0.0.1:4222")
 
-		// test reload error
-		oldTestMap := testMap
-		testMap = nil
-		oldCfg := ConfigPath
-		for k := range ConfigPath {
-			ConfigPath[k] = "wrong/path/"
-		}
-		defer func() {
-			ConfigPath = oldCfg
-			testMap = oldTestMap
-		}()
-		testEndPoint(t, "GET", "/reload", "", 500)
-	}()
-}
-
-// stop the server listener
-func stopServer() {
-	if serverListener != nil {
-		serverListener.Close()
+	// test reload error
+	oldTestMap := testMap
+	testMap = nil
+	oldCfg := ConfigPath
+	for k := range ConfigPath {
+		ConfigPath[k] = "wrong/path/"
 	}
+	defer func() {
+		ConfigPath = oldCfg
+		testMap = oldTestMap
+	}()
+	testEndPoint(t, "GET", "/reload", "", 500)
 }
 
 // triggerPanic triggers a Panic
