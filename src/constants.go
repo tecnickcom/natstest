@@ -1,17 +1,19 @@
 package main
 
-// ProgramName contains this program name
+// ProgramName defines this application name
 const ProgramName = "natstest"
 
-// ProgramVersion contains this program version
-// This is automatically populated by the Makefile using the value from the VERSION file
+// ProgramVersion set this application version
+// This is supposed to be automatically populated by the Makefile using the value from the VERSION file
+// (-ldflags '-X main.ProgramVersion=$(shell cat VERSION)')
 var ProgramVersion = "0.0.0"
 
 // ProgramRelease contains this program release number (or build number)
 // This is automatically populated by the Makefile using the value from the RELEASE file
+// (-ldflags '-X main.ProgramRelease=$(shell cat RELEASE)')
 var ProgramRelease = "0"
 
-// ConfigPath list the local paths where to look for configuration files (in order)
+// ConfigPath list the paths where to look for configuration files (in order)
 var ConfigPath = [...]string{
 	"../resources/test/etc/" + ProgramName + "/",
 	"./",
@@ -26,10 +28,10 @@ const RemoteConfigProvider = ""
 // RemoteConfigEndpoint is the remote configuration URL (ip:port)
 const RemoteConfigEndpoint = ""
 
-// RemoteConfigPath is the remote configuration path where to search fo the configuration file ("/config/natstest")
+// RemoteConfigPath is the remote configuration path where to search fo the configuration file ("/config/srv-idp")
 const RemoteConfigPath = ""
 
-// RemoteConfigSecretKeyring is the path to the openpgp secret keyring used to decript the remote configuration data ("/etc/natstest/configkey.gpg")
+// RemoteConfigSecretKeyring is the path to the openpgp secret keyring used to decript the remote configuration data ("/etc/srv-idp/configkey.gpg")
 const RemoteConfigSecretKeyring = "" // #nosec
 
 // Log (syslog)
@@ -58,11 +60,11 @@ const StatsAddress = ":8125"
 // When 0 the buffer is only flushed when it is full.
 const StatsFlushPeriod = 100
 
-// ServerNetwork is the network type used by the server (tcp)
-const ServerNetwork = "tcp"
-
 // ServerAddress is the HTTP API URL (ip:port) or just (:port)
-const ServerAddress = ":8081"
+const ServerAddress = ":8000"
+
+// ServerShutdownTimeout timeout in seconds before forcing the server to close
+const ServerShutdownTimeout = 10
 
 // NatsAddress is the default NATS bus address
 const NatsAddress = "nats://127.0.0.1:4222"

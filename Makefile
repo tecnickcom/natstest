@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------------
 
 # List special make targets that are not associated with files
-.PHONY: help all test format fmtcheck vet lint coverage cyclo ineffassign misspell astscan qa deps install uninstall clean nuke build rpm deb bz2 docker dockertest buildall dbuild
+.PHONY: help all test format fmtcheck vet lint coverage cyclo ineffassign misspell structcheck varcheck errcheck gosimple astscan qa deps install uninstall clean nuke build rpm deb bz2 docker dockertest buildall dbuild
 
 # Use bash as shell (Note: Ubuntu now uses dash which doesn't support PIPESTATUS).
 SHELL=/bin/bash
@@ -96,14 +96,20 @@ PATHBZ2PKG=$(CURRENTDIR)/target/BZ2
 # DOCKER Packaging path (where BZ2s will be stored)
 PATHDOCKERPKG=$(CURRENTDIR)/target/DOCKER
 
-# Cross compilation targets
-CCTARGETS=darwin/386 darwin/amd64 freebsd/386 freebsd/amd64 freebsd/arm linux/386 linux/amd64 linux/arm openbsd/386 openbsd/amd64 windows/386 windows/amd64
-
 # docker image name for consul (used during testing)
 CONSUL_DOCKER_IMAGE_NAME=consul_$(VENDOR)_$(PROJECT)$(DOCKERSUFFIX)
 
 # docker image name for NATS (used during testing)
 NATS_DOCKER_IMAGE_NAME=nats_$(VENDOR)_$(PROJECT)$(DOCKERSUFFIX)
+
+# STATIC is a flag to indicate whether to build using static or dynamic linking
+ifeq ($(STATIC),0)
+	STATIC_TAG=dynamic
+	STATIC_FLAG=
+else
+	STATIC_TAG=static
+	STATIC_FLAG=-static
+endif
 
 # --- MAKE TARGETS ---
 
@@ -125,6 +131,10 @@ help:
 	@echo "    make cyclo       : Generate the cyclomatic complexity report"
 	@echo "    make ineffassign : Detect ineffectual assignments"
 	@echo "    make misspell    : Detect commonly misspelled words in source files"
+	@echo "    make structcheck : Find unused struct fields"
+	@echo "    make varcheck    : Find unused global variables and constants"
+	@echo "    make errcheck    : Check that error return values are used"
+	@echo "    make gosimple    : Suggest code simplifications"
 	@echo "    make astscan     : GO AST scanner"
 	@echo ""
 	@echo "    make docs        : Generate source code documentation"
@@ -153,7 +163,17 @@ test:
 	@mkdir -p target/test
 	@mkdir -p target/report
 	nohup gnatsd --debug --trace > target/nats.log 2>&1 & echo $$! > target/nats.pid
-	GOPATH=$(GOPATH) go test -covermode=count -coverprofile=target/report/coverage.out -bench=. -race -v ./src | \
+	GOPATH=$(GOPATH) \
+	go test \
+	-tags ${STATIC_TAG} \
+	-covermode=atomic \
+	-bench=. \
+	-race \
+	-cpuprofile=target/report/cpu.out \
+	-memprofile=target/report/mem.out \
+	-mutexprofile=target/report/mutex.out \
+	-coverprofile=target/report/coverage.out \
+	-v ./src | \
 	tee >(PATH=$(GOPATH)/bin:$(PATH) go-junit-report > target/test/report.xml); \
 	test $${PIPESTATUS[0]} -eq 0 ; \
 	echo $$? > target/test.exit; \
@@ -170,9 +190,15 @@ fmtcheck:
 	@find ./src -type f -name "*.go" -exec gofmt -s -d {} \; | tee target/format.diff
 	@test ! -s target/format.diff || { echo "ERROR: the source code has not been formatted - please use 'make format' or 'gofmt'"; exit 1; }
 
+# Validate JSON configuration files against the JSON schema
+confcheck:
+	json validate --schema-file=resources/etc/natstest/config.schema.json --document-file=resources/test/etc/natstest/config.json
+	json validate --schema-file=resources/etc/natstest/config.schema.json --document-file=resources/etc/natstest/config.json
+
 # Check for syntax errors
 vet:
-	GOPATH=$(GOPATH) go vet ./src
+	GOPATH=$(GOPATH) \
+	go vet ./src
 
 # Check for style errors
 lint:
@@ -181,7 +207,8 @@ lint:
 # Generate the coverage report
 coverage:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) go tool cover -html=target/report/coverage.out -o target/report/coverage.html
+	GOPATH=$(GOPATH) \
+	go tool cover -html=target/report/coverage.out -o target/report/coverage.html
 
 # Report cyclomatic complexity
 cyclo:
@@ -196,12 +223,32 @@ ineffassign:
 # Detect commonly misspelled words in source files
 misspell:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) misspell -error ./src | tee target/report/misspell.txt ; test $${PIPESTATUS[0]} -eq 0
+	GOPATH=$(GOPATH) misspell -error ./src  | tee target/report/misspell.txt ; test $${PIPESTATUS[0]} -eq 0
+
+# Find unused struct fields.
+structcheck:
+	@mkdir -p target/report
+	GOPATH=$(GOPATH) structcheck -a ./src  | tee target/report/structcheck.txt
+
+# Find unused global variables and constants.
+varcheck:
+	@mkdir -p target/report
+	GOPATH=$(GOPATH) varcheck -e ./src  | tee target/report/varcheck.txt
+
+# Check that error return values are used.
+errcheck:
+	@mkdir -p target/report
+	GOPATH=$(GOPATH) errcheck ./src  | tee target/report/errcheck.txt
+
+# Suggest code simplifications"
+gosimple:
+	@mkdir -p target/report
+	GOPATH=$(GOPATH) gosimple ./src  | tee target/report/gosimple.txt
 
 # AST scanner
 astscan:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) gas ./src/*.go | tee target/report/astscan.txt ; test $${PIPESTATUS[0]} -eq 0
+	GOPATH=$(GOPATH) gas ./src/*.go | tee target/report/astscan.txt ; test $${PIPESTATUS[0]} -eq 0 || true
 
 # Generate source docs
 docs:
@@ -211,22 +258,26 @@ docs:
 	@echo '<html><head><meta http-equiv="refresh" content="0;./127.0.0.1:6060/pkg/'${CVSPATH}'/'${PROJECT}'/index.html"/></head><a href="./127.0.0.1:6060/pkg/'${CVSPATH}'/'${PROJECT}'/index.html">'${PKGNAME}' Documentation ...</a></html>' > target/docs/index.html
 
 # Alias to run targets: fmtcheck test vet lint coverage
-qa: fmtcheck test vet lint coverage cyclo ineffassign misspell astscan
+qa: fmtcheck confcheck test vet lint coverage cyclo ineffassign misspell structcheck varcheck errcheck gosimple astscan
 
 # --- INSTALL ---
 
 # Get the dependencies
 deps:
-	GOPATH=$(GOPATH) go get -v ./...
+	GOPATH=$(GOPATH) go get -tags ${STATIC_TAG} -v ./src
+	GOPATH=$(GOPATH) go get github.com/nats-io/gnatsd
+	GOPATH=$(GOPATH) go get github.com/inconshreveable/mousetrap
 	GOPATH=$(GOPATH) go get github.com/golang/lint/golint
 	GOPATH=$(GOPATH) go get github.com/jstemmer/go-junit-report
 	GOPATH=$(GOPATH) go get github.com/axw/gocov/gocov
 	GOPATH=$(GOPATH) go get github.com/fzipp/gocyclo
 	GOPATH=$(GOPATH) go get github.com/gordonklaus/ineffassign
 	GOPATH=$(GOPATH) go get github.com/client9/misspell/cmd/misspell
-	GOPATH=$(GOPATH) go get github.com/inconshreveable/mousetrap
-	GOPATH=$(GOPATH) go get github.com/nats-io/gnatsd
-	GOPATH=$(GOPATH) go get github.com/HewlettPackard/gas
+	GOPATH=$(GOPATH) go get github.com/opennota/check/cmd/structcheck
+	GOPATH=$(GOPATH) go get github.com/opennota/check/cmd/varcheck
+	GOPATH=$(GOPATH) go get github.com/kisielk/errcheck
+	GOPATH=$(GOPATH) go get honnef.co/go/tools/cmd/gosimple
+	GOPATH=$(GOPATH) go get github.com/GoASTScanner/gas
 
 # Install this application
 install: uninstall
@@ -278,24 +329,9 @@ nuke:
 build: deps
 	GOPATH=$(GOPATH) \
 	CGO_ENABLED=0 \
-	go build -ldflags '-extldflags "-static" -w -s -X main.ProgramVersion=${VERSION} -X main.ProgramRelease=${RELEASE}' -o ./target/${BINPATH}$(PROJECT) ./src
+	go build -tags ${STATIC_TAG} -ldflags '-linkmode external -extldflags ${STATIC_FLAG} -w -s -X main.ProgramVersion=${VERSION} -X main.ProgramRelease=${RELEASE}' -o ./target/${BINPATH}$(PROJECT) ./src
 ifneq (${UPXENABLED},)
 	upx --brute ./target/${BINPATH}$(PROJECT)
-endif
-
-# Cross-compile the application for several platforms
-crossbuild: deps
-	@echo "" > target/ccfailures.txt
-	$(foreach TARGET,$(CCTARGETS), \
-		$(eval GOOS = $(word 1,$(subst /, ,$(TARGET)))) \
-		$(eval GOARCH = $(word 2,$(subst /, ,$(TARGET)))) \
-		$(shell which mkdir) -p target/$(TARGET) && \
-		GOOS=${GOOS} GOARCH=${GOARCH} GOPATH=$(GOPATH) go build -ldflags '-extldflags "-static" -w -s -X main.ProgramVersion=${VERSION}' -o ./target/${GOOS}/${GOARCH}/$(PROJECT) ./src \
-		|| echo $(TARGET) >> target/ccfailures.txt ; \
-	)
-ifneq ($(strip $(cat target/ccfailures.txt)),)
-	echo target/ccfailures.txt
-	exit 1
 endif
 
 # --- PACKAGING ---
@@ -411,7 +447,6 @@ dockertest:
 	@exit `grep -ic "false" target/project_docker_container.run`
 
 # Full build and test sequence
-# You may want to change this and remove the options you don't need
 buildall: build qa rpm deb
 
 # Build everything inside a Docker container

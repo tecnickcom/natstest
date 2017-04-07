@@ -37,7 +37,12 @@ func closeNatsBus() {
 	log.WithFields(log.Fields{
 		"nats": natsOpts.Servers,
 	}).Info("closing NATS bus connection")
-	natsConn.Flush()
+	err := natsConn.Flush()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Error("Flush NATS bus connection")
+	}
 	natsConn.Close()
 }
 

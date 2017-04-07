@@ -14,7 +14,7 @@
     "address": ":8125",
     "flush_period": 100
   },
-  "serverAddress" : ":8081",
+  "serverAddress" : ":8000",
   "natsAddress" : "nats://127.0.0.1:4222",
   "validTransfCmd" : [
     "/bin/cat",

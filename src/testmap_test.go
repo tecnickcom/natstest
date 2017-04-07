@@ -29,12 +29,23 @@ func TestLoadTestMapError1(t *testing.T) {
 
 func loadTestMapErrorTesting(t *testing.T, mode os.FileMode) {
 	tmpdir := "../target/tmp/"
-	os.RemoveAll(tmpdir)
-	os.MkdirAll(tmpdir, 0700)
-	defer os.RemoveAll(tmpdir)
+	err := os.RemoveAll(tmpdir)
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
+	}
+	err = os.MkdirAll(tmpdir, 0700)
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
+	}
+	defer func() {
+		err := os.RemoveAll(tmpdir)
+		if err != nil {
+			t.Error(fmt.Errorf("Unexpected error: %v", err))
+		}
+	}()
 	data := []byte("[{")
 	file := tmpdir + "test_@error.json"
-	err := ioutil.WriteFile(file, data, 0644)
+	err = ioutil.WriteFile(file, data, 0644)
 	if err != nil {
 		t.Error(fmt.Errorf("unable to write the file: %s -- %v", file, err))
 	}

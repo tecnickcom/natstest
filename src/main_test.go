@@ -9,12 +9,24 @@ import (
 	"testing"
 )
 
-func getMainOutput() (string, error) {
+func TestProgramVersion(t *testing.T) {
+	os.Args = []string{ProgramName, "version"}
+	out := getMainOutput(t)
+	match, err := regexp.MatchString("^[\\d]+\\.[\\d]+\\.[\\d]+[\\s]*$", out)
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
+	}
+	if !match {
+		t.Error(fmt.Errorf("The expected version has not been returned"))
+	}
+}
+
+func getMainOutput(t *testing.T) string {
 	old := os.Stdout // keep backup of the real stdout
 	defer func() { os.Stdout = old }()
 	r, w, err := os.Pipe()
 	if err != nil {
-		return "", err
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
 	}
 	os.Stdout = w
 
@@ -25,30 +37,19 @@ func getMainOutput() (string, error) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, err := io.Copy(&buf, r)
+		if err != nil {
+			t.Error(fmt.Errorf("Unexpected error: %v", err))
+		}
 		outC <- buf.String()
 	}()
 
 	// back to normal state
-	w.Close()
+	err = w.Close()
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
+	}
 	out := <-outC
 
-	return out, nil
-}
-
-func TestMainVersion(t *testing.T) {
-	oldArgs := os.Args
-	defer func() { os.Args = oldArgs }()
-	os.Args = []string{"natstest", "version"}
-	out, err := getMainOutput()
-	if err != nil {
-		t.Error(fmt.Errorf("Unexpected error: %v", err))
-	}
-	match, err := regexp.MatchString("^[\\d]+\\.[\\d]+\\.[\\d]+[\\s]*$", out)
-	if err != nil {
-		t.Error(fmt.Errorf("Unexpected error: %v", err))
-	}
-	if !match {
-		t.Error(fmt.Errorf("The version has an invalid format"))
-	}
+	return out
 }

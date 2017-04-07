@@ -1,3 +1,4 @@
 target
-vendor
 /Dockerfile
+*.bak
+src.test

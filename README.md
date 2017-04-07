@@ -13,7 +13,7 @@
 
 * **category**:    Service
 * **author**:      Nicola Asuni <nicola.asuni@miracl.com>
-* **copyright**:   2016 MIRACL UK LTD
+* **copyright**:   2016-2017 MIRACL UK LTD
 * **license**:     ASL 2.0 - http://www.apache.org/licenses/LICENSE-2.0
 * **link**:        https://github.com/miracl/natstest
 
@@ -29,6 +29,14 @@ The test sequences are defined using the JSON format and can be either stored as
 
 ![Main Schema](doc/images/natstest_schema.png)
 
+
+## Requirements
+
+An additional Python program is used to check the validity of the JSON configuration files against a JSON schema:
+
+```
+sudo pip install json-spec 
+```
 
 ## Quick Start
 

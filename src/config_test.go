@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -61,7 +62,7 @@ func TestGetConfigParams(t *testing.T) {
 	if err != nil {
 		t.Error(fmt.Errorf("An error was not expected: %v", err))
 	}
-	if prm.serverAddress != ":8081" {
+	if prm.serverAddress != ":8000" {
 		t.Error(fmt.Errorf("Found different server address than expected, found %s", prm.serverAddress))
 	}
 	if prm.log.Level != "DEBUG" {
@@ -72,15 +73,15 @@ func TestGetConfigParams(t *testing.T) {
 func TestGetLocalConfigParams(t *testing.T) {
 
 	// test environment variables
-	defer unsetRemoteConfigEnv()
-	os.Setenv("NATSTEST_REMOTECONFIGPROVIDER", "consul")
-	os.Setenv("NATSTEST_REMOTECONFIGENDPOINT", "127.0.0.1:98765")
-	os.Setenv("NATSTEST_REMOTECONFIGPATH", "/config/natstest")
-	os.Setenv("NATSTEST_REMOTECONFIGSECRETKEYRING", "")
+	defer unsetRemoteConfigEnv(t)
+	setRemoteConfigEnv(t, []string{"consul", "127.0.0.1:98765", "/config/natstest", ""})
 
-	prm, rprm := getLocalConfigParams()
+	prm, rprm, err := getLocalConfigParams()
+	if err != nil {
+		t.Error(fmt.Errorf("An error was not expected: %v", err))
+	}
 
-	if prm.serverAddress != ":8081" {
+	if prm.serverAddress != ":8000" {
 		t.Error(fmt.Errorf("Found different server address than expected, found %s", prm.serverAddress))
 	}
 	if prm.log.Level != "DEBUG" {
@@ -99,7 +100,7 @@ func TestGetLocalConfigParams(t *testing.T) {
 		t.Error(fmt.Errorf("Found different remoteConfigSecretKeyring than expected, found %s", rprm.remoteConfigSecretKeyring))
 	}
 
-	_, err := getRemoteConfigParams(prm, rprm)
+	_, err = getRemoteConfigParams(prm, rprm)
 	if err == nil {
 		t.Error(fmt.Errorf("A remote configuration error was expected"))
 	}
@@ -121,11 +122,8 @@ func TestGetConfigParamsRemote(t *testing.T) {
 	}
 
 	// test environment variables
-	defer unsetRemoteConfigEnv()
-	os.Setenv("NATSTEST_REMOTECONFIGPROVIDER", "consul")
-	os.Setenv("NATSTEST_REMOTECONFIGENDPOINT", "127.0.0.1:8500")
-	os.Setenv("NATSTEST_REMOTECONFIGPATH", "/config/natstest")
-	os.Setenv("NATSTEST_REMOTECONFIGSECRETKEYRING", "")
+	defer unsetRemoteConfigEnv(t)
+	setRemoteConfigEnv(t, []string{"consul", "127.0.0.1:8500", "/config/srv-idp", ""})
 
 	// load a specific config file just for testing
 	oldCfg := ConfigPath
@@ -150,11 +148,8 @@ func TestGetConfigParamsRemote(t *testing.T) {
 func TestCliWrongConfigError(t *testing.T) {
 
 	// test environment variables
-	defer unsetRemoteConfigEnv()
-	os.Setenv("NATSTEST_REMOTECONFIGPROVIDER", "consul")
-	os.Setenv("NATSTEST_REMOTECONFIGENDPOINT", "127.0.0.1:999999")
-	os.Setenv("NATSTEST_REMOTECONFIGPATH", "/config/wrong")
-	os.Setenv("NATSTEST_REMOTECONFIGSECRETKEYRING", "")
+	defer unsetRemoteConfigEnv(t)
+	setRemoteConfigEnv(t, []string{"consul", "127.0.0.1:999999", "/config/wrong", ""})
 
 	// load a specific config file just for testing
 	oldCfg := ConfigPath
@@ -164,17 +159,41 @@ func TestCliWrongConfigError(t *testing.T) {
 	}
 	defer func() { ConfigPath = oldCfg }()
 
-	_, err := cli()
-	if err == nil {
-		t.Error(fmt.Errorf("An error was expected"))
+	cmd, err := cli()
+	if err != nil {
+		t.Error(fmt.Errorf("Unexpected error: %v", err))
 		return
+	}
+	if cmdtype := reflect.TypeOf(cmd).String(); cmdtype != "*cobra.Command" {
+		t.Error(fmt.Errorf("The expected type is '*cobra.Command', found: '%s'", cmdtype))
+		return
+	}
+
+	old := os.Stderr // keep backup of the real stdout
+	defer func() { os.Stderr = old }()
+	os.Stderr = nil
+
+	// execute the main function
+	if err := cmd.Execute(); err == nil {
+		t.Error(fmt.Errorf("An error was expected"))
 	}
 }
 
-// unsetRemoteConfigEnv clear the environmental variables used to set the remote configuration
-func unsetRemoteConfigEnv() {
-	os.Setenv("NATSTEST_REMOTECONFIGPROVIDER", "")
-	os.Setenv("NATSTEST_REMOTECONFIGENDPOINT", "")
-	os.Setenv("NATSTEST_REMOTECONFIGPATH", "")
-	os.Setenv("NATSTEST_REMOTECONFIGSECRETKEYRING", "")
+func unsetRemoteConfigEnv(t *testing.T) {
+	setRemoteConfigEnv(t, []string{"", "", "", ""})
+}
+
+func setRemoteConfigEnv(t *testing.T, val []string) {
+	envVar := []string{
+		"NATSTEST_REMOTECONFIGPROVIDER",
+		"NATSTEST_REMOTECONFIGENDPOINT",
+		"NATSTEST_REMOTECONFIGPATH",
+		"NATSTEST_REMOTECONFIGSECRETKEYRING",
+	}
+	for i, ev := range envVar {
+		err := os.Setenv(ev, val[i])
+		if err != nil {
+			t.Error(fmt.Errorf("Unexpected error: %v", err))
+		}
+	}
 }
