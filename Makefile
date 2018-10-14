@@ -248,7 +248,7 @@ gosimple:
 # AST scanner
 astscan:
 	@mkdir -p target/report
-	GOPATH=$(GOPATH) gas ./src/*.go | tee target/report/astscan.txt ; test $${PIPESTATUS[0]} -eq 0 || true
+	GOPATH=$(GOPATH) gosec ./src/ | tee target/report/astscan.txt ; test $${PIPESTATUS[0]} -eq 0 || true
 
 # Generate source docs
 docs:
