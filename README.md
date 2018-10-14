@@ -1,6 +1,6 @@
 # natstest
 
-*NATS Bus Test Component*
+*NATS Bus Functional Test Component*
 
 [![Master Branch](https://img.shields.io/badge/-master:-gray.svg)](https://github.com/miracl/natstest/tree/master)
 [![Master Build Status](https://secure.travis-ci.org/miracl/natstest.png?branch=master)](https://travis-ci.org/miracl/natstest?branch=master)
