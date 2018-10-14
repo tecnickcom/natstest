@@ -2,20 +2,20 @@
 
 *NATS Bus Functional Test Component*
 
-[![Master Branch](https://img.shields.io/badge/-master:-gray.svg)](https://github.com/miracl/natstest/tree/master)
-[![Master Build Status](https://secure.travis-ci.org/miracl/natstest.png?branch=master)](https://travis-ci.org/miracl/natstest?branch=master)
-[![Master Coverage Status](https://coveralls.io/repos/miracl/natstest/badge.svg?branch=master&service=github)](https://coveralls.io/github/miracl/natstest?branch=master)
+[![Master Branch](https://img.shields.io/badge/-master:-gray.svg)](https://github.com/tecnickcom/natstest/tree/master)
+[![Master Build Status](https://secure.travis-ci.org/tecnickcom/natstest.png?branch=master)](https://travis-ci.org/tecnickcom/natstest?branch=master)
+[![Master Coverage Status](https://coveralls.io/repos/tecnickcom/natstest/badge.svg?branch=master&service=github)](https://coveralls.io/github/tecnickcom/natstest?branch=master)
 
-[![Develop Branch](https://img.shields.io/badge/-develop:-gray.svg)](https://github.com/miracl/natstest/tree/develop)
-[![Develop Build Status](https://secure.travis-ci.org/miracl/natstest.png?branch=develop)](https://travis-ci.org/miracl/natstest?branch=develop)
-[![Develop Coverage Status](https://coveralls.io/repos/miracl/natstest/badge.svg?branch=develop&service=github)](https://coveralls.io/github/miracl/natstest?branch=develop)
-[![Go Report Card](https://goreportcard.com/badge/github.com/miracl/natstest)](https://goreportcard.com/report/github.com/miracl/natstest)
+[![Develop Branch](https://img.shields.io/badge/-develop:-gray.svg)](https://github.com/tecnickcom/natstest/tree/develop)
+[![Develop Build Status](https://secure.travis-ci.org/tecnickcom/natstest.png?branch=develop)](https://travis-ci.org/tecnickcom/natstest?branch=develop)
+[![Develop Coverage Status](https://coveralls.io/repos/tecnickcom/natstest/badge.svg?branch=develop&service=github)](https://coveralls.io/github/tecnickcom/natstest?branch=develop)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tecnickcom/natstest)](https://goreportcard.com/report/github.com/tecnickcom/natstest)
 
 * **category**:    Service
 * **author**:      Nicola Asuni <info@tecnick.com>
 * **copyright**:   2016-2017 MIRACL UK LTD
 * **license**:     ASL 2.0 - http://www.apache.org/licenses/LICENSE-2.0
-* **link**:        https://github.com/miracl/natstest
+* **link**:        https://github.com/tecnickcom/natstest
 
 ## Description
 
@@ -81,17 +81,17 @@ make format
 
 To manually create the container you can execute:
 ```
-docker build --tag="miracl/natstestdev" .
+docker build --tag="tecnickcom/natstestdev" .
 ```
 
 To log into the newly created container:
 ```
-docker run -t -i miracl/natstestdev /bin/bash
+docker run -t -i tecnickcom/natstestdev /bin/bash
 ```
 
 To get the container ID:
 ```
-CONTAINER_ID=`docker ps -a | grep miracl/natstestdev | cut -c1-12`
+CONTAINER_ID=`docker ps -a | grep tecnickcom/natstestdev | cut -c1-12`
 ```
 
 To delete the newly created docker container:
@@ -101,7 +101,7 @@ docker rm -f $CONTAINER_ID
 
 To delete the docker image:
 ```
-docker rmi -f miracl/natstestdev
+docker rmi -f tecnickcom/natstestdev
 ```
 
 To delete all containers

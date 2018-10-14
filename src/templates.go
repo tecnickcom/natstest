@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // validTransfCommandMap is a map containing the list of valid transformation commands

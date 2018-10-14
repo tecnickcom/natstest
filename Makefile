@@ -1,11 +1,11 @@
 # MAKEFILE
 #
 # @author      Nicola Asuni <info@tecnick.com>
-# @link        https://github.com/miracl/natstest
+# @link        https://github.com/tecnickcom/natstest
 #
 # This file is intended to be executed in a Linux-compatible system.
 # It also assumes that the project has been cloned in the right path under GOPATH:
-# $GOPATH/src/github.com/miracl/natstest
+# $GOPATH/src/github.com/tecnickcom/natstest
 #
 # ------------------------------------------------------------------------------
 
@@ -267,7 +267,7 @@ deps:
 	GOPATH=$(GOPATH) go get -tags ${STATIC_TAG} -v ./src
 	GOPATH=$(GOPATH) go get github.com/nats-io/gnatsd
 	GOPATH=$(GOPATH) go get github.com/inconshreveable/mousetrap
-	GOPATH=$(GOPATH) go get github.com/golang/lint/golint
+	GOPATH=$(GOPATH) go get golang.org/x/lint/golint
 	GOPATH=$(GOPATH) go get github.com/jstemmer/go-junit-report
 	GOPATH=$(GOPATH) go get github.com/axw/gocov/gocov
 	GOPATH=$(GOPATH) go get github.com/fzipp/gocyclo
@@ -277,7 +277,7 @@ deps:
 	GOPATH=$(GOPATH) go get github.com/opennota/check/cmd/varcheck
 	GOPATH=$(GOPATH) go get github.com/kisielk/errcheck
 	GOPATH=$(GOPATH) go get honnef.co/go/tools/cmd/gosimple
-	GOPATH=$(GOPATH) go get github.com/GoASTScanner/gas
+	GOPATH=$(GOPATH) go get github.com/securego/gosec/cmd/gosec/...
 
 # Install this application
 install: uninstall

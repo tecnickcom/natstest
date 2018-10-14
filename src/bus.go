@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/nats-io/nats"
+	log "github.com/sirupsen/logrus"
 )
 
 var busTimeout = time.Duration(BusTimeout) * time.Second
