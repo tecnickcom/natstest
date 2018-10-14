@@ -2,9 +2,9 @@
 #
 # Linux development environment
 #
-# Extend the miracl/alldev image defined in
-# https://github.com/miracl/alldev
+# Extend the tecnickcom/alldev image defined in
+# https://github.com/tecnickcom/alldev
 # ------------------------------------------------------------------------------
 
-FROM miracl/alldev
-MAINTAINER nicola.asuni@miracl
+FROM tecnickcom/alldev
+MAINTAINER info@tecnick.com

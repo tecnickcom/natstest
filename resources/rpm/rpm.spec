@@ -60,11 +60,11 @@ if [ $1 -eq 1 ] ; then
 fi
 
 %changelog
-* Wed Jul 06 2016 Nicola Asuni <nicola.asuni@miracl.com> 5.1.5-1
+* Wed Jul 06 2016 Nicola Asuni <info@tecnick.com> 5.1.5-1
 - Updated license - first public version
-* Sat May 28 2016 Nicola Asuni <nicola.asuni@miracl.com> 2.2.0-1
+* Sat May 28 2016 Nicola Asuni <info@tecnick.com> 2.2.0-1
 - Updated description
 - Add init scripts
-* Fri Apr 15 2016 Nicola Asuni <nicola.asuni@miracl.com> 1.0.0-1
+* Fri Apr 15 2016 Nicola Asuni <info@tecnick.com> 1.0.0-1
 - Initial Commit
 

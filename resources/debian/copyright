@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: ~#PROJECT#~
-Upstream-Contact: Nicola Asuni <nicola.asuni@miracl.com>
+Upstream-Contact: Nicola Asuni <info@tecnick.com>
 Source: https://github.com/~#VENDOR#~/~#PROJECT#~
 
 Files: *

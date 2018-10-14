@@ -10,7 +10,7 @@
 #
 # To use this git hook, copy it under the .git/hooks folder and be sure it has the executable bit set.
 #
-# @author Nicola Asuni <nicola.asuni@miracl.com>
+# @author Nicola Asuni <info@tecnick.com>
 
 # read the current git branch name
 CURRENT_GIT_BRANCH=`git rev-parse --abbrev-ref HEAD`

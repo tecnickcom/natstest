@@ -12,7 +12,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/miracl/natstest)](https://goreportcard.com/report/github.com/miracl/natstest)
 
 * **category**:    Service
-* **author**:      Nicola Asuni <nicola.asuni@miracl.com>
+* **author**:      Nicola Asuni <info@tecnick.com>
 * **copyright**:   2016-2017 MIRACL UK LTD
 * **license**:     ASL 2.0 - http://www.apache.org/licenses/LICENSE-2.0
 * **link**:        https://github.com/miracl/natstest
@@ -284,4 +284,4 @@ For example:
 
 ## Developer(s) Contact
 
-* Nicola Asuni <nicola.asuni@miracl.com>
+* Nicola Asuni <info@tecnick.com>
