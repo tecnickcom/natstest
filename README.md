@@ -5,10 +5,6 @@
 [![Master Branch](https://img.shields.io/badge/-master:-gray.svg)](https://github.com/tecnickcom/natstest/tree/master)
 [![Master Build Status](https://secure.travis-ci.org/tecnickcom/natstest.png?branch=master)](https://travis-ci.org/tecnickcom/natstest?branch=master)
 [![Master Coverage Status](https://coveralls.io/repos/tecnickcom/natstest/badge.svg?branch=master&service=github)](https://coveralls.io/github/tecnickcom/natstest?branch=master)
-
-[![Develop Branch](https://img.shields.io/badge/-develop:-gray.svg)](https://github.com/tecnickcom/natstest/tree/develop)
-[![Develop Build Status](https://secure.travis-ci.org/tecnickcom/natstest.png?branch=develop)](https://travis-ci.org/tecnickcom/natstest?branch=develop)
-[![Develop Coverage Status](https://coveralls.io/repos/tecnickcom/natstest/badge.svg?branch=develop&service=github)](https://coveralls.io/github/tecnickcom/natstest?branch=develop)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tecnickcom/natstest)](https://goreportcard.com/report/github.com/tecnickcom/natstest)
 
 * **category**:    Service
