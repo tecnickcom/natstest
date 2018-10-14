@@ -31,6 +31,7 @@ addons:
   apt:
     packages:
     - devscripts
+    - fakeroot
     - debhelper
     - pkg-config
     - alien
@@ -52,4 +53,4 @@ after_failure:
   - cat ./target/test/report.xml
 
 after_success:
-- if [ "$TRAVIS_GO_VERSION" = "1.8" ]; then $HOME/gopath/bin/goveralls -covermode=count -coverprofile=target/report/coverage.out -service=travis-ci; fi;
+- if [ "$TRAVIS_GO_VERSION" = "1.11.1" ]; then $HOME/gopath/bin/goveralls -covermode=count -coverprofile=target/report/coverage.out -service=travis-ci; fi;
