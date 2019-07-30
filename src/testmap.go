@@ -42,19 +42,19 @@ func loadTestMap() error {
 			key := re.FindStringSubmatch(file)
 			if _, exist := testMap[key[1]]; !exist {
 				// store the test config file (local files have priority)
-				raw, err := ioutil.ReadFile(file)
+				raw, err := ioutil.ReadFile(file) // #nosec
 				if err != nil {
-					return fmt.Errorf("Unable to read the configuration file: %v", err)
+					return fmt.Errorf("unable to read the configuration file: %v", err)
 				}
 				err = loadRawJSONTest(raw, key[1])
 				if err != nil {
-					return fmt.Errorf("Unable to decode the test file %s: %v", file, err)
+					return fmt.Errorf("unable to decode the test file %s: %v", file, err)
 				}
 			}
 		}
 	}
 	if len(testMap) == 0 {
-		return fmt.Errorf("Unable to find valid test configuration files")
+		return fmt.Errorf("unable to find valid test configuration files")
 	}
 	return nil
 }

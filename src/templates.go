@@ -39,7 +39,7 @@ func replaceTemplates(obj interface{}) (interface{}, error) {
 	// encode the copy interface as json
 	jsoncopy, err := json.Marshal(copy.Interface())
 	if err != nil {
-		return nil, fmt.Errorf("Unable to encode to JSON")
+		return nil, fmt.Errorf("unable to encode to JSON")
 	}
 
 	// unescape marked json strings
@@ -57,7 +57,7 @@ func replaceTemplates(obj interface{}) (interface{}, error) {
 	var ret interface{}
 	err = json.Unmarshal(jsoncopy, &ret)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to decode JSON: %s", jsoncopy)
+		return nil, fmt.Errorf("unable to decode JSON: %s", jsoncopy)
 	}
 
 	return ret, nil

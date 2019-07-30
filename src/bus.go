@@ -27,7 +27,7 @@ func openNatsBus() (err error) {
 	}).Info("opening NATS bus connection")
 	natsConn, err = natsOpts.Connect()
 	if err != nil {
-		return fmt.Errorf("Can't connect to the NATS message queue %v", err)
+		return fmt.Errorf("can't connect to the NATS message queue %v", err)
 	}
 	return nil
 }
@@ -41,7 +41,7 @@ func closeNatsBus() {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err": err,
-		}).Error("Flush NATS bus connection")
+		}).Error("flush NATS bus connection")
 	}
 	natsConn.Close()
 }

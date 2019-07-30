@@ -200,13 +200,13 @@ func checkParams(prm *params) error {
 
 	// StatsD
 	if prm.stats.Prefix == "" {
-		return errors.New("The stats Prefix is empty")
+		return errors.New("the stats Prefix is empty")
 	}
 	if prm.stats.Network != "udp" && prm.stats.Network != "tcp" {
-		return errors.New("The stats Network must be udp or tcp")
+		return errors.New("the stats Network must be udp or tcp")
 	}
 	if prm.stats.FlushPeriod < 0 {
-		return errors.New("The stats FlushPeriod must be >= 0")
+		return errors.New("the stats FlushPeriod must be >= 0")
 	}
 
 	if prm.serverAddress == "" {
